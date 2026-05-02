@@ -41,7 +41,7 @@ public class IngredientStack {
     public IngredientStack(Ingredient pIngredient, int pCount) {
         this.ingredient = pIngredient;
         this.count = Math.min(pCount, 64);
-        this.registryName = new ResourceLocation(pIngredient.values[0].serialize().has("item") ?
+        this.registryName = ResourceLocation.fromNamespaceAndPath(pIngredient.values[0].serialize().has("item") ?
                 pIngredient.values[0].serialize().get("item").getAsString()
                 : pIngredient.values[0].serialize().get("tag").getAsString());
     }
