@@ -1,6 +1,7 @@
 package com.smashingmods.alchemylib.api.storage;
 
-import net.minecraftforge.energy.EnergyStorage;
+
+import net.neoforged.neoforge.energy.EnergyStorage;
 
 /**
  * This class is a wrapper around {@link EnergyStorage} which adds a call to {@link EnergyStorageHandler#onEnergyChanged()}
@@ -26,7 +27,7 @@ public class EnergyStorageHandler extends EnergyStorage {
      * higher than 0 and less than capacity.
      */
     public void setEnergy(int pEnergy) {
-        this.energy = Math.max(Math.min(pEnergy, capacity), 0);
+        this.energy = Math.clamp(pEnergy, 0, capacity);
         onEnergyChanged();
     }
 

@@ -2,7 +2,8 @@ package com.smashingmods.alchemylib.api.blockentity.processing;
 
 import com.smashingmods.alchemylib.api.storage.EnergyStorageHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
@@ -15,14 +16,8 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
@@ -39,11 +34,10 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     private boolean ioScreenOpen = false;
 
     private final EnergyStorageHandler energyHandler = initializeEnergyStorage();
-    private final LazyOptional<IEnergyStorage> lazyEnergyHandler = LazyOptional.of(() -> energyHandler);
 
     public AbstractProcessingBlockEntity(String pModId, BlockEntityType<?> pBlockEntityType, BlockPos pWorldPosition, BlockState pBlockState) {
         super(pBlockEntityType, pWorldPosition, pBlockState);
-        this.name = MutableComponent.create(new TranslatableContents(String.format("%s.container.%s", pModId, ForgeRegistries.BLOCK_ENTITY_TYPES.getKey(getType())), null, TranslatableContents.NO_ARGS));
+        this.name = MutableComponent.create(new TranslatableContents(String.format("%s.container.%s", pModId, BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(getType())), null, TranslatableContents.NO_ARGS));
     }
 
     @Override
@@ -52,17 +46,17 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    public CompoundTag getUpdateTag() {
-        CompoundTag tag = super.getUpdateTag();
-        saveAdditional(tag);
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        saveAdditional(tag, registries);
         return tag;
     }
 
     @Override
-    public void onDataPacket(Connection pConnection, ClientboundBlockEntityDataPacket pPacket) {
+    public void onDataPacket(Connection pConnection, ClientboundBlockEntityDataPacket pPacket, HolderLookup.Provider lookupProvider) {
         Objects.requireNonNull(pPacket.getTag());
-        this.load(pPacket.getTag());
-        super.onDataPacket(pConnection, pPacket);
+        this.loadAdditional(pPacket.getTag(), lookupProvider);
+        super.onDataPacket(pConnection, pPacket, lookupProvider);
     }
 
     @Nullable
@@ -164,35 +158,20 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    @Nonnull
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> pCapability, @Nullable Direction pDirection) {
-        if (pCapability == ForgeCapabilities.ENERGY) {
-            return lazyEnergyHandler.cast();
-        }
-        return super.getCapability(pCapability, pDirection);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        setProgress(tag.getInt("progress"));
+        setRecipeLocked(tag.getBoolean("locked"));
+        setPaused(tag.getBoolean("paused"));
+        energyHandler.deserializeNBT(registries, Objects.requireNonNull(tag.get("energy")));
     }
 
     @Override
-    public void invalidateCaps() {
-        lazyEnergyHandler.invalidate();
-        super.invalidateCaps();
-    }
-
-    @Override
-    protected void saveAdditional(CompoundTag pTag) {
-        pTag.putInt("progress", progress);
-        pTag.putBoolean("locked", isRecipeLocked());
-        pTag.putBoolean("paused", isProcessingPaused());
-        pTag.put("energy", energyHandler.serializeNBT());
-        super.saveAdditional(pTag);
-    }
-
-    @Override
-    public void load(CompoundTag pTag) {
-        super.load(pTag);
-        setProgress(pTag.getInt("progress"));
-        setRecipeLocked(pTag.getBoolean("locked"));
-        setPaused(pTag.getBoolean("paused"));
-        energyHandler.deserializeNBT(pTag.get("energy"));
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        tag.putInt("progress", progress);
+        tag.putBoolean("locked", isRecipeLocked());
+        tag.putBoolean("paused", isProcessingPaused());
+        tag.put("energy", energyHandler.serializeNBT(registries));
+        super.saveAdditional(tag, registries);
     }
 }

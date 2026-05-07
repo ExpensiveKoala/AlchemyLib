@@ -63,13 +63,13 @@ public class DatagenHelpers {
     }
 
     public static void ingredientStackListToJson(JsonObject pJson, String pKey, Collection<IngredientStack> pIngredientStackList) {
-        if (!pIngredientStackList.isEmpty()) {
-            JsonArray jsonArray = new JsonArray();
-            for (IngredientStack ingredientStack : pIngredientStackList) {
-                jsonArray.add(ingredientStack.toJson());
-            }
-            pJson.add(pKey, jsonArray);
-        }
+//        if (!pIngredientStackList.isEmpty()) {
+//            JsonArray jsonArray = new JsonArray();
+//            for (IngredientStack ingredientStack : pIngredientStackList) {
+//                jsonArray.add(ingredientStack.toJson());
+//            }
+//            pJson.add(pKey, jsonArray);
+//        }
     }
 
     public static void fluidStacktoJson(JsonObject pJson, String pKey, FluidStack pFluidStack) {
@@ -98,7 +98,7 @@ public class DatagenHelpers {
     }
 
     public static IngredientStack toIngredientStack(String pString, int pCount) {
-        return new IngredientStack(getChemicalItem(pString), pCount);
+        return (IngredientStack) IngredientStack.of(getChemicalItem(pString), pCount).getCustomIngredient();
     }
 
     private static ItemLike getChemicalItem(String pString) {

@@ -1,21 +1,24 @@
 package com.smashingmods.alchemylib.api.network;
 
-import com.smashingmods.alchemylib.api.blockentity.container.AbstractProcessingMenu;
+import com.smashingmods.alchemylib.AlchemyLib;
 import com.smashingmods.alchemylib.common.network.*;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * AbstractPacketHandler is meant to be extended by other mods. It provides
@@ -25,32 +28,66 @@ import java.util.function.Supplier;
  * <p>Extend AlchemyPacket to easily create your own. Use the builtin packets
  * as an example for how they should work.</p>
  *
- * @see AlchemyPacket
+ * @see AlchemyPacketHandler
  * @see BlockEntityPacket
  * @see SearchPacket
  * @see ToggleLockButtonPacket
  * @see TogglePauseButtonPacket
  */
 @SuppressWarnings({"unused", "SameParameterValue"})
+@EventBusSubscriber(modid = AlchemyLib.MODID)
 public abstract class AbstractPacketHandler {
 
-    /**
-     * All packets need to have a valid unique discriminator. AbstractPacketHandler
-     * sets a private int PACKET_ID that implementing classes will need to increment.
-     */
-    private int PACKET_ID;
+    private static final List<Consumer<RegisterPayloadHandlersEvent>> PACKET_HANDLERS = Collections.synchronizedList(new ArrayList<>());
 
-    /**
-     * To send packets, you have to have a SimpleChannel registered in the NetworkRegistry.
-     *
-     * @param pChannelName ResourceLocation for your {@link SimpleChannel}.
-     * @param pProtocolVersion String representation of your protocol version (for example "1.0.0").
-     * @return a new SimpleChannel registered in the {@link NetworkRegistry}.
-     *
-     * @see NetworkRegistry#newSimpleChannel(ResourceLocation, Supplier, Predicate, Predicate)
-     */
-    protected static SimpleChannel createChannel(ResourceLocation pChannelName, String pProtocolVersion) {
-        return NetworkRegistry.newSimpleChannel(pChannelName, () -> pProtocolVersion, pProtocolVersion::equals, pProtocolVersion::equals);
+    private final List<AlchemyPacketHandler<?>> clientPackets = new ArrayList<>();
+    private final List<AlchemyPacketHandler<?>> serverPackets = new ArrayList<>();
+    private final String version;
+
+    public AbstractPacketHandler(String version) {
+        this.version = version;
+
+        PACKET_HANDLERS.add(this::registerPackets);
+    }
+
+    private void registerPackets(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(version);
+        for (AlchemyPacketHandler<?> packet : clientPackets) {
+            registerClientPacket(registrar, packet);
+        }
+
+        for (AlchemyPacketHandler<?> packet : serverPackets) {
+            registerServerPacket(registrar, packet);
+        }
+    }
+
+    private <T extends AlchemyPacket<T>> void registerClientPacket(PayloadRegistrar registrar, AlchemyPacketHandler<T> packet) {
+        registrar.playToClient(
+                packet.type(),
+                packet.codec(),
+                (payload, context) -> payload.packet().handler().handle(payload.packet(), context)
+        );
+    }
+
+    private <T extends AlchemyPacket<T>> void registerServerPacket(PayloadRegistrar registrar, AlchemyPacketHandler<T> packet) {
+        registrar.playToServer(
+                packet.type(),
+                packet.codec(),
+                (payload, context) -> payload.packet().handler().handle(payload.packet(), context)
+        );
+    }
+
+    @SubscribeEvent
+    public static void register(final RegisterPayloadHandlersEvent event) {
+        PACKET_HANDLERS.forEach(handler -> handler.accept(event));
+    }
+
+    protected <T extends AlchemyPacket<T>> void registerClientBoundPacket(AlchemyPacketHandler<T> packet) {
+        clientPackets.add(packet);
+    }
+
+    protected <T extends AlchemyPacket<T>> void registerServerBoundPacket(AlchemyPacketHandler<T> packet) {
+        serverPackets.add(packet);
     }
 
     /**
@@ -64,43 +101,15 @@ public abstract class AbstractPacketHandler {
     public abstract AbstractPacketHandler register();
 
     /**
-     * Implement this getter to return your own instance of {@link SimpleChannel} on your
-     * PacketHandler class. This is used to get the channel for sending packets
-     * by other parts of your mod.
-     *
-     * @return {@link SimpleChannel}
-     *
-     * @see AbstractProcessingMenu#broadcastChanges()
-     */
-    protected abstract SimpleChannel getChannel();
-
-    /**
-     * All packets must be registered on your SimpleChannel. Call this method in your
-     * implementation class's register method.
-     *
-     * @param pMessageType Class of your packet. (for example BlockEntityPacket.class)
-     * @param pDecoder A function that takes a {@link FriendlyByteBuf} and returns a packet.
-     *                 Typically, you want this to be a constructor on your packet,
-     *                 but it can also be a static method that returns a new object.
-     * @param <MSG> AlchemyPacket
-     *
-     * @see PacketHandler#register()
-     * @see BlockEntityPacket#BlockEntityPacket(FriendlyByteBuf)  BlockEntityPacket
-     */
-    protected <MSG extends AlchemyPacket> void registerMessage(Class<MSG> pMessageType, Function<FriendlyByteBuf, MSG> pDecoder) {
-        getChannel().registerMessage(PACKET_ID++, pMessageType, AlchemyPacket::encode, pDecoder, AlchemyPacket::handle);
-    }
-
-    /**
      * Sends the packet passed as a parameter to the server via your {@link SimpleChannel}.
      *
      * @param pMessage Your packet to send to the server.
-     * @param <MSG> extends AlchemyPacket
+     * @param <T> extends AlchemyPacket
      *
-     * @see AlchemyPacket
+     * @see AlchemyPacketHandler
      */
-    public <MSG extends AlchemyPacket> void sendToServer(MSG pMessage) {
-        getChannel().sendToServer(pMessage);
+    public <T extends AlchemyPacket<T>> void sendToServer(T pMessage) {
+        PacketDistributor.sendToServer(new AlchemyPacketPayload<>(pMessage));
     }
 
     /**
@@ -108,12 +117,12 @@ public abstract class AbstractPacketHandler {
      *
      * @param pMessage Your packet to send to the player.
      * @param pPlayer And instance of ServerPlayer.
-     * @param <MSG> AlchemyPacket
+     * @param <T> AlchemyPacket
      *
-     * @see AlchemyPacket
+     * @see AlchemyPacketHandler
      */
-    public <MSG extends AlchemyPacket> void sendToPlayer(MSG pMessage, ServerPlayer pPlayer) {
-        getChannel().send(PacketDistributor.PLAYER.with(() -> pPlayer), pMessage);
+    public <T extends AlchemyPacket<T>> void sendToPlayer(T pMessage, ServerPlayer pPlayer) {
+        PacketDistributor.sendToPlayer(pPlayer, new AlchemyPacketPayload<>(pMessage));
     }
 
     /**
@@ -122,10 +131,10 @@ public abstract class AbstractPacketHandler {
      * LAN, or a dedicated server.
      *
      * @param pMessage Your packet to send to all players.
-     * @param <MSG> AlchemyPacket
+     * @param <T> AlchemyPacket
      */
-    public <MSG extends AlchemyPacket> void sendToAll(MSG pMessage) {
-         getChannel().send(PacketDistributor.ALL.noArg(), pMessage);
+    public <T extends AlchemyPacket<T>> void sendToAll(T pMessage) {
+        PacketDistributor.sendToAllPlayers(new AlchemyPacketPayload<>(pMessage));
     }
 
     /**
@@ -137,15 +146,15 @@ public abstract class AbstractPacketHandler {
      *               of the BlockPos parameter.
      * @param pBlockPos BlockPos that is the center location for where to send the packet.
      * @param pRadius Distance in blocks from the center BlockPos, the packet is sent to everyone in this radius.
-     * @param <MSG> AlchemyPacket
+     * @param <T> AlchemyPacket
      *
      */
-    public <MSG extends AlchemyPacket> void sendToNear(MSG pMessage, Level pLevel, BlockPos pBlockPos, double pRadius) {
+    public <T extends AlchemyPacket<T>> void sendToNear(T pMessage, @Nullable ServerPlayer exclude, ServerLevel pLevel, BlockPos pBlockPos, double pRadius) {
         ResourceKey<Level> dimension = pLevel.dimension();
         double posX = pBlockPos.getX();
         double posY = pBlockPos.getY();
         double posZ = pBlockPos.getZ();
-        getChannel().send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(posX, posY, posZ, pRadius, dimension)), pMessage);
+        PacketDistributor.sendToPlayersNear(pLevel, exclude, posX, posY, posZ, pRadius, new AlchemyPacketPayload<>(pMessage));
     }
 
     /**
@@ -156,13 +165,13 @@ public abstract class AbstractPacketHandler {
      * @param pLevel An instance of the Level (overworld, nether, end, etc) used to determine the context
      *               of the BlockPos parameter.
      * @param pBlockPos BlockPos used to find the chunk being tracked.
-     * @param <MSG> AlchemyPacket
+     * @param <T> AlchemyPacket
      *
      * @see Level
      * @see BlockPos
      */
-    public <MSG extends AlchemyPacket> void sendToTrackingChunk(MSG pMessage, Level pLevel, BlockPos pBlockPos) {
+    public <T extends AlchemyPacket<T>> void sendToTrackingChunk(T pMessage, ServerLevel pLevel, BlockPos pBlockPos) {
         LevelChunk levelChunk = pLevel.getChunkAt(pBlockPos);
-        getChannel().send(PacketDistributor.TRACKING_CHUNK.with(() -> levelChunk), pMessage);
+        PacketDistributor.sendToPlayersTrackingChunk(pLevel, levelChunk.getPos(), new AlchemyPacketPayload<>(pMessage));
     }
 }

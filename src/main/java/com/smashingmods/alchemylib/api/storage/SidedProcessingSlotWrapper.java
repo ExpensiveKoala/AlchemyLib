@@ -1,13 +1,13 @@
 package com.smashingmods.alchemylib.api.storage;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+
+import java.util.Optional;
 
 /**
  * A wrapper around two {@link ProcessingSlotHandler} instances that can be used for
@@ -32,8 +32,7 @@ public class SidedProcessingSlotWrapper {
     private final ProcessingSlotHandler inputHandler;
     private final ProcessingSlotHandler outputHandler;
     private final SideMode[] sideModes = new SideMode[7]; // 4 cardinal directions + up/down + unspecified side = 7 sides total
-    @SuppressWarnings("unchecked") // Java does not allow creating arrays with generics for some ungodly reason
-    private final LazyOptional<IItemHandler>[] views = new LazyOptional[7];
+    private final IItemHandler[] views = new IItemHandler[7];
 
     private class SidedItemHandlerView implements IItemHandlerModifiable {
         private final Direction side;
@@ -48,7 +47,6 @@ public class SidedProcessingSlotWrapper {
         }
 
         @Override
-        @Nonnull
         public ItemStack getStackInSlot(int slot) {
             if (slot < inputHandler.getSlots()) {
                 return inputHandler.getStackInSlot(slot);
@@ -58,7 +56,6 @@ public class SidedProcessingSlotWrapper {
         }
 
         @Override
-        @Nonnull
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
             if (!getSideMode(side).isPullEnabled() || slot >= inputHandler.getSlots()) {
                 return stack;
@@ -67,7 +64,6 @@ public class SidedProcessingSlotWrapper {
         }
 
         @Override
-        @Nonnull
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
             if (!getSideMode(side).isPushEnabled() || slot < inputHandler.getSlots()) {
                 return ItemStack.EMPTY;
@@ -112,13 +108,9 @@ public class SidedProcessingSlotWrapper {
     }
 
     public IItemHandler getView(@Nullable Direction side) {
-        return getViewLazily(side).orElse(null);
-    }
-
-    public LazyOptional<IItemHandler> getViewLazily(@Nullable Direction side) {
-        LazyOptional<IItemHandler> view = views[side == null ? 6 : side.ordinal()];
+        IItemHandler view = views[side == null ? 6 : side.ordinal()];
         if (view == null) {
-            view = LazyOptional.of(() -> new SidedItemHandlerView(side));
+            view = new SidedItemHandlerView(side);
             views[side == null ? 6 : side.ordinal()] = view;
         }
         return view;
@@ -138,14 +130,6 @@ public class SidedProcessingSlotWrapper {
 
     public ProcessingSlotHandler getOutputHandler() {
         return outputHandler;
-    }
-
-    public void invalidate() {
-        for (LazyOptional<IItemHandler> view : views) {
-            if (view != null) {
-                view.invalidate();
-            }
-        }
     }
 
     /**

@@ -32,7 +32,7 @@ public class SideModeButton extends AbstractAlchemyButton {
 
     @Override
     public void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        boolean open = ((ProcessingBlockEntity) parent.getBlockEntity()).isSideConfigScreenOpen();
+        boolean open = parent.getBlockEntity().isSideConfigScreenOpen();
         int u = open ? 25 : 85;
         int v = open ? 80 : 0;
 

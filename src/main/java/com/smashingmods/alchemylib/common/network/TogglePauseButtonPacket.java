@@ -1,41 +1,51 @@
 package com.smashingmods.alchemylib.common.network;
 
+import com.smashingmods.alchemylib.AlchemyLib;
 import com.smashingmods.alchemylib.api.blockentity.processing.AbstractProcessingBlockEntity;
 import com.smashingmods.alchemylib.api.network.AlchemyPacket;
+import com.smashingmods.alchemylib.api.network.AlchemyPacketHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class TogglePauseButtonPacket implements AlchemyPacket {
+public record TogglePauseButtonPacket(BlockPos blockPos, boolean paused) implements AlchemyPacket<TogglePauseButtonPacket> {
 
-    private final BlockPos blockPos;
-    private final boolean paused;
+    public static final AlchemyPacketHandler<TogglePauseButtonPacket> HANDLER = new Packet();
 
-    public TogglePauseButtonPacket(BlockPos pBlockPos, boolean pPause) {
-        this.blockPos = pBlockPos;
-        this.paused = pPause;
+    @Override
+    public AlchemyPacketHandler<TogglePauseButtonPacket> handler() {
+        return HANDLER;
     }
 
-    public TogglePauseButtonPacket(FriendlyByteBuf pBuffer) {
-        this.blockPos = pBuffer.readBlockPos();
-        this.paused = pBuffer.readBoolean();
-    }
+    private static class Packet implements AlchemyPacketHandler<TogglePauseButtonPacket> {
 
-    public void encode(FriendlyByteBuf pBuffer) {
-        pBuffer.writeBlockPos(blockPos);
-        pBuffer.writeBoolean(paused);
-    }
+        @Override
+        public ResourceLocation getId() {
+            return ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "toggle_pause_button");
+        }
 
-    public void handle(NetworkEvent.Context pContext) {
-        Player player = pContext.getSender();
-        if (player != null) {
-            AbstractProcessingBlockEntity blockEntity = (AbstractProcessingBlockEntity) player.level().getBlockEntity(blockPos);
+        @Override
+        public void encode(TogglePauseButtonPacket packet, RegistryFriendlyByteBuf pBuffer) {
+            pBuffer.writeBlockPos(packet.blockPos);
+            pBuffer.writeBoolean(packet.paused);
+        }
+
+        @Override
+        public void handle(TogglePauseButtonPacket message, IPayloadContext pContext) {
+            Player player = pContext.player();
+            AbstractProcessingBlockEntity blockEntity = (AbstractProcessingBlockEntity) player.level().getBlockEntity(message.blockPos);
 
             if (blockEntity != null) {
-                blockEntity.setPaused(paused);
+                blockEntity.setPaused(message.paused);
                 blockEntity.setChanged();
             }
+        }
+
+        @Override
+        public TogglePauseButtonPacket decode(RegistryFriendlyByteBuf buf) {
+            return new TogglePauseButtonPacket(buf.readBlockPos(), buf.readBoolean());
         }
     }
 }

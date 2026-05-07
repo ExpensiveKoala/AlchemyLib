@@ -1,42 +1,50 @@
 package com.smashingmods.alchemylib.common.network;
 
+import com.smashingmods.alchemylib.AlchemyLib;
 import com.smashingmods.alchemylib.api.blockentity.processing.AbstractSearchableBlockEntity;
 import com.smashingmods.alchemylib.api.network.AlchemyPacket;
+import com.smashingmods.alchemylib.api.network.AlchemyPacketHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class SearchPacket implements AlchemyPacket {
+public record SearchPacket(BlockPos blockPos, String searchText) implements AlchemyPacket<SearchPacket> {
 
-    private final BlockPos blockPos;
-    private final String searchText;
-
-    public SearchPacket(BlockPos pBlockPos, String pSearchText) {
-        this.blockPos = pBlockPos;
-        this.searchText = pSearchText;
-    }
-
-    public SearchPacket(FriendlyByteBuf pBuffer) {
-        this.blockPos = pBuffer.readBlockPos();
-        this.searchText = pBuffer.readUtf();
-    }
-
-    public void encode(FriendlyByteBuf pBuffer) {
-        pBuffer.writeBlockPos(blockPos);
-        pBuffer.writeUtf(searchText);
-    }
+    public static final AlchemyPacketHandler<SearchPacket> HANDLER = new Packet();
 
     @Override
-    public void handle(NetworkEvent.Context pContext) {
-        Player player = pContext.getSender();
-        if (player != null) {
-            AbstractSearchableBlockEntity blockEntity = (AbstractSearchableBlockEntity) player.level().getBlockEntity(blockPos);
+    public AlchemyPacketHandler<SearchPacket> handler() {
+        return HANDLER;
+    }
+
+    private static class Packet implements AlchemyPacketHandler<SearchPacket> {
+        @Override
+        public ResourceLocation getId() {
+            return ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "search");
+        }
+
+        @Override
+        public void encode(SearchPacket packet, RegistryFriendlyByteBuf pBuffer) {
+            pBuffer.writeBlockPos(packet.blockPos);
+            pBuffer.writeUtf(packet.searchText);
+        }
+
+        @Override
+        public void handle(SearchPacket message, IPayloadContext pContext) {
+            Player player = pContext.player();
+            AbstractSearchableBlockEntity blockEntity = (AbstractSearchableBlockEntity) player.level().getBlockEntity(message.blockPos);
 
             if (blockEntity != null) {
-                blockEntity.setSearchText(searchText);
+                blockEntity.setSearchText(message.searchText);
                 blockEntity.setChanged();
             }
+        }
+
+        @Override
+        public SearchPacket decode(RegistryFriendlyByteBuf buf) {
+            return new SearchPacket(buf.readBlockPos(), buf.readUtf());
         }
     }
 }

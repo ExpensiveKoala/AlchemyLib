@@ -5,27 +5,19 @@ import com.smashingmods.alchemylib.api.storage.ProcessingSlotHandler;
 import com.smashingmods.alchemylib.api.storage.SidedProcessingSlotWrapper;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import org.jetbrains.annotations.Nullable;
-
-import javax.annotation.Nonnull;
+import net.neoforged.neoforge.fluids.FluidUtil;
 
 @SuppressWarnings("unused")
 public abstract class AbstractFluidBlockEntity extends AbstractProcessingBlockEntity implements FluidBlockEntity, InventoryBlockEntity {
 
     private final FluidStorageHandler fluidStorage = initializeFluidStorage();
-    private final LazyOptional<IFluidHandler> lazyFluidHandler = LazyOptional.of(() -> fluidStorage);
 
     private final ProcessingSlotHandler inputHandler = initializeInputHandler();
     private final ProcessingSlotHandler outputHandler = initializeOutputHandler();
@@ -63,44 +55,26 @@ public abstract class AbstractFluidBlockEntity extends AbstractProcessingBlockEn
         return combinedHandler;
     }
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> pCapability, @Nullable Direction pDirection) {
-        if (pCapability == ForgeCapabilities.ITEM_HANDLER) {
-            return getCombinedSlotHandler().getViewLazily(pDirection).cast();
-        } else if (pCapability == ForgeCapabilities.FLUID_HANDLER) {
-            return lazyFluidHandler.cast();
-        }
-        return super.getCapability(pCapability, pDirection);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        combinedHandler.invalidate();
-        lazyFluidHandler.invalidate();
-        super.invalidateCaps();
-    }
-
     @Override
     public boolean isRecipeLocked() {
         return false;
     }
 
     @Override
-    protected void saveAdditional(CompoundTag pTag) {
-        pTag.put("input", inputHandler.serializeNBT());
-        pTag.put("output", outputHandler.serializeNBT());
-        pTag.put("fluid", fluidStorage.writeToNBT(new CompoundTag()));
+    protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider registries) {
+        pTag.put("input", inputHandler.serializeNBT(registries));
+        pTag.put("output", outputHandler.serializeNBT(registries));
+        pTag.put("fluid", fluidStorage.writeToNBT(registries, new CompoundTag()));
         pTag.putShort("sides", combinedHandler.sideModesToShort());
-        super.saveAdditional(pTag);
+        super.saveAdditional(pTag, registries);
     }
 
     @Override
-    public void load(CompoundTag pTag) {
-        super.load(pTag);
-        inputHandler.deserializeNBT(pTag.getCompound("input"));
-        outputHandler.deserializeNBT(pTag.getCompound("output"));
-        fluidStorage.readFromNBT(pTag.getCompound("fluid"));
+    public void loadAdditional(CompoundTag pTag, HolderLookup.Provider registries) {
+        super.loadAdditional(pTag, registries);
+        inputHandler.deserializeNBT(registries, pTag.getCompound("input"));
+        outputHandler.deserializeNBT(registries, pTag.getCompound("output"));
+        fluidStorage.readFromNBT(registries, pTag.getCompound("fluid"));
         if (pTag.contains("sides")) {
             combinedHandler.setSideModesFromShort(pTag.getShort("sides"));
         } else {

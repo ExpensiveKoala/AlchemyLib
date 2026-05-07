@@ -24,7 +24,7 @@ import java.util.function.BiFunction;
  * @see BaseEntityBlock
  */
 @SuppressWarnings("unused")
-public class AbstractProcessingBlock extends BaseEntityBlock {
+public abstract class AbstractProcessingBlock extends BaseEntityBlock {
 
     private final BiFunction<BlockPos, BlockState, BlockEntity> blockEntityFunction;
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -97,7 +97,6 @@ public class AbstractProcessingBlock extends BaseEntityBlock {
      */
 
     @Override
-    @SuppressWarnings("deprecation")
     public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
         if (pState.getBlock() != pNewState.getBlock()) {
             BlockEntity blockEntity = pLevel.getBlockEntity(pPos);

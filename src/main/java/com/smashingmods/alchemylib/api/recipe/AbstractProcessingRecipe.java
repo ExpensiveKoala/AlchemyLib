@@ -1,34 +1,18 @@
 package com.smashingmods.alchemylib.api.recipe;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
 
 /**
  * This abstract implementation of {@link ProcessingRecipe} implements default methods that should
  * be ignored by extending classes.
  */
-public abstract class AbstractProcessingRecipe implements ProcessingRecipe, Comparable<AbstractProcessingRecipe> {
-
-    private final ResourceLocation recipeId;
-    private final String group;
-
-    public AbstractProcessingRecipe(ResourceLocation pRecipeId, String pGroup) {
-        this.recipeId = pRecipeId;
-        this.group = pGroup;
-    }
-
-    @Override
-    public ResourceLocation getId() {
-        return recipeId;
-    }
-
-    @Override
-    public String getGroup() {
-        return group;
-    }
+public abstract class AbstractProcessingRecipe<T extends ProcessingRecipe> implements Recipe<T> {
 
     /**
      * This method must be overridden by the implementing class, but it's only used for
@@ -36,7 +20,7 @@ public abstract class AbstractProcessingRecipe implements ProcessingRecipe, Comp
      * class if another return is necessary.
      */
     @Override
-    public boolean matches(Inventory pContainer, Level pLevel) {
+    public boolean matches(T pContainer, Level pLevel) {
         return false;
     }
 
@@ -45,7 +29,7 @@ public abstract class AbstractProcessingRecipe implements ProcessingRecipe, Comp
      * crafting ignores this in favor of handling this logic within block entities.
      */
     @Override
-    public ItemStack assemble(Inventory pContainer, RegistryAccess pRegistryAccess) {
+    public ItemStack assemble(T pContainer, HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
 
@@ -54,7 +38,7 @@ public abstract class AbstractProcessingRecipe implements ProcessingRecipe, Comp
      * an empty ItemStack. If your implementing class does return an ItemStack, override this.
      */
     @Override
-    public ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+    public ItemStack getResultItem(HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
 
@@ -65,10 +49,5 @@ public abstract class AbstractProcessingRecipe implements ProcessingRecipe, Comp
     @Override
     public boolean canCraftInDimensions(int pWidth, int pHeight) {
         return false;
-    }
-
-    @Override
-    public boolean equals(Object pOther) {
-        return pOther instanceof AbstractProcessingRecipe recipe && compareTo(recipe) == 0;
     }
 }

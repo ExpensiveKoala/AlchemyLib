@@ -1,41 +1,50 @@
 package com.smashingmods.alchemylib.common.network;
 
+import com.smashingmods.alchemylib.AlchemyLib;
 import com.smashingmods.alchemylib.api.blockentity.processing.AbstractProcessingBlockEntity;
+import com.smashingmods.alchemylib.api.network.AlchemyPacketHandler;
 import com.smashingmods.alchemylib.api.network.AlchemyPacket;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class ToggleLockButtonPacket implements AlchemyPacket {
+public record ToggleLockButtonPacket(BlockPos blockPos, boolean locked) implements AlchemyPacket<ToggleLockButtonPacket> {
 
-    private final BlockPos blockPos;
-    private final boolean locked;
+    public static final AlchemyPacketHandler<ToggleLockButtonPacket> HANDLER = new Packet();
 
-    public ToggleLockButtonPacket(BlockPos pBlockPos, boolean pLock) {
-        this.blockPos = pBlockPos;
-        this.locked = pLock;
+    @Override
+    public AlchemyPacketHandler<ToggleLockButtonPacket> handler() {
+        return HANDLER;
     }
 
-    public ToggleLockButtonPacket(FriendlyByteBuf pBuffer) {
-        this.blockPos = pBuffer.readBlockPos();
-        this.locked = pBuffer.readBoolean();
-    }
+    private static class Packet implements AlchemyPacketHandler<ToggleLockButtonPacket> {
+        @Override
+        public ResourceLocation getId() {
+            return ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "toggle_lock_button");
+        }
 
-    public void encode(FriendlyByteBuf pBuffer) {
-        pBuffer.writeBlockPos(blockPos);
-        pBuffer.writeBoolean(locked);
-    }
+        @Override
+        public void encode(ToggleLockButtonPacket packet, RegistryFriendlyByteBuf pBuffer) {
+            pBuffer.writeBlockPos(packet.blockPos);
+            pBuffer.writeBoolean(packet.locked);
+        }
 
-    public void handle(NetworkEvent.Context pContext) {
-        Player player = pContext.getSender();
-        if (player != null) {
-            AbstractProcessingBlockEntity blockEntity = (AbstractProcessingBlockEntity) player.level().getBlockEntity(blockPos);
+        @Override
+        public void handle(ToggleLockButtonPacket message, IPayloadContext pContext) {
+            Player player = pContext.player();
+            AbstractProcessingBlockEntity blockEntity = (AbstractProcessingBlockEntity) player.level().getBlockEntity(message.blockPos());
 
             if (blockEntity != null) {
-                blockEntity.setRecipeLocked(locked);
+                blockEntity.setRecipeLocked(message.locked());
                 blockEntity.setChanged();
             }
+        }
+
+        @Override
+        public ToggleLockButtonPacket decode(RegistryFriendlyByteBuf buf) {
+            return new ToggleLockButtonPacket(buf.readBlockPos(), buf.readBoolean());
         }
     }
 }

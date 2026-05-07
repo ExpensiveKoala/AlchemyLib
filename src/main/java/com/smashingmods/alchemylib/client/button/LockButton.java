@@ -9,8 +9,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 
-import javax.annotation.Nonnull;
-
 @SuppressWarnings("unused")
 public class LockButton extends AbstractAlchemyButton {
 
@@ -24,7 +22,7 @@ public class LockButton extends AbstractAlchemyButton {
     }
 
     @Override
-    public void renderWidget(@Nonnull GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
         pGuiGraphics.blit(ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "textures/gui/widgets.png"), getX(), getY(), 25 + ((blockEntity.isRecipeLocked() ? 0 : 1) * 20), 0, width, height);
         renderButtonTooltip(pGuiGraphics, pMouseX, pMouseY);
     }

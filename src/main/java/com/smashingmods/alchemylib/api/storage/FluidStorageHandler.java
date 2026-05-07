@@ -1,8 +1,8 @@
 package com.smashingmods.alchemylib.api.storage;
 
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 
 /**
  * This class is a wrapper around {@link FluidTank} that adds some helper methods.
@@ -40,7 +40,7 @@ public class FluidStorageHandler extends FluidTank {
      * higher than 0 and less than capacity.
      */
     public void setAmount(int pValue) {
-        fluid.setAmount(Math.max(Math.min(pValue, capacity), 0));
+        fluid.setAmount(Math.clamp(pValue, 0, capacity));
     }
 
     /**

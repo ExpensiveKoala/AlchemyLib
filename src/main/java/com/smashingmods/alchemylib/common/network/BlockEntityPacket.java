@@ -1,39 +1,50 @@
 package com.smashingmods.alchemylib.common.network;
 
+import com.smashingmods.alchemylib.AlchemyLib;
 import com.smashingmods.alchemylib.api.network.AlchemyPacket;
+import com.smashingmods.alchemylib.api.network.AlchemyPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.Objects;
 
-public class BlockEntityPacket implements AlchemyPacket {
+public record BlockEntityPacket(BlockPos blockPos, CompoundTag tag) implements AlchemyPacket<BlockEntityPacket> {
 
-    private final BlockPos blockPos;
-    private final CompoundTag tag;
+    public static final AlchemyPacketHandler<BlockEntityPacket> HANDLER = new Packet();
 
-    public BlockEntityPacket(BlockPos pBlockPos, CompoundTag pTag) {
-        this.blockPos = pBlockPos;
-        this.tag = pTag;
+    @Override
+    public AlchemyPacketHandler<BlockEntityPacket> handler() {
+        return HANDLER;
     }
 
-    public BlockEntityPacket(FriendlyByteBuf pBuffer) {
-        this.blockPos = pBuffer.readBlockPos();
-        this.tag = pBuffer.readNbt();
-    }
+    private static class Packet implements AlchemyPacketHandler<BlockEntityPacket> {
+        @Override
+        public ResourceLocation getId() {
+            return ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "block_entity_packet");
+        }
 
-    public void encode(FriendlyByteBuf pBuffer) {
-        pBuffer.writeBlockPos(blockPos);
-        pBuffer.writeNbt(tag);
-    }
+        @Override
+        public void encode(BlockEntityPacket packet, RegistryFriendlyByteBuf pBuffer) {
+            pBuffer.writeBlockPos(packet.blockPos);
+            pBuffer.writeNbt(packet.tag);
+        }
 
-    public void handle(NetworkEvent.Context pContext) {
-        Level level = Minecraft.getInstance().level;
-        BlockEntity blockEntity = Objects.requireNonNull(level).getBlockEntity(blockPos);
-        Objects.requireNonNull(blockEntity).load(tag);
+        @Override
+        public void handle(BlockEntityPacket message, IPayloadContext pContext) {
+            Level level = Minecraft.getInstance().level;
+            BlockEntity blockEntity = Objects.requireNonNull(level).getBlockEntity(message.blockPos);
+            Objects.requireNonNull(blockEntity).loadCustomOnly(message.tag, level.registryAccess());
+        }
+
+        @Override
+        public BlockEntityPacket decode(RegistryFriendlyByteBuf buf) {
+            return new BlockEntityPacket(buf.readBlockPos(), buf.readNbt());
+        }
     }
 }
