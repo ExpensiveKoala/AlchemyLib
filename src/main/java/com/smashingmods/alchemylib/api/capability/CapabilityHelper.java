@@ -8,9 +8,10 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 
+@SuppressWarnings("unused")
 public class CapabilityHelper {
 
-    public static <T extends AbstractProcessingBlockEntity> void registerCapabilities(RegisterCapabilitiesEvent event, T blockEntity, BlockEntityType<T> blockEntityType) {
+    public static <T extends AbstractProcessingBlockEntity> void registerDefaultCapabilities(RegisterCapabilitiesEvent event, T blockEntity, BlockEntityType<T> blockEntityType) {
         if (blockEntity instanceof AbstractInventoryBlockEntity) {
             event.registerBlockEntity(
                     Capabilities.ItemHandler.BLOCK,
