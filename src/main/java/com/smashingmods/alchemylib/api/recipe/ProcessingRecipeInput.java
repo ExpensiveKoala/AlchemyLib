@@ -1,6 +1,5 @@
 package com.smashingmods.alchemylib.api.recipe;
 
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeInput;
 
 /**
@@ -10,13 +9,7 @@ import net.minecraft.world.item.crafting.RecipeInput;
  * <p>Consumers of this recipe need to handle type casting when getting the input and output.</p>
  */
 @SuppressWarnings("unused")
-public interface ProcessingRecipe extends RecipeInput {
-
-    /**
-     * Create a copy of this ProcessingRecipe that can be modified without altering
-     * the original copy.
-     */
-    ProcessingRecipe copy();
+public interface ProcessingRecipeInput extends RecipeInput {
 
     Object getInput();
 

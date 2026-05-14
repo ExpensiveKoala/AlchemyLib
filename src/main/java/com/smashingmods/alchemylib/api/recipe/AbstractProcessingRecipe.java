@@ -1,18 +1,15 @@
 package com.smashingmods.alchemylib.api.recipe;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
 
 /**
- * This abstract implementation of {@link ProcessingRecipe} implements default methods that should
+ * This abstract implementation of {@link ProcessingRecipeInput} implements default methods that should
  * be ignored by extending classes.
  */
-public abstract class AbstractProcessingRecipe<T extends ProcessingRecipe> implements Recipe<T> {
+public abstract class AbstractProcessingRecipe<T extends ProcessingRecipeInput> implements Recipe<T> {
 
     /**
      * This method must be overridden by the implementing class, but it's only used for
@@ -50,4 +47,10 @@ public abstract class AbstractProcessingRecipe<T extends ProcessingRecipe> imple
     public boolean canCraftInDimensions(int pWidth, int pHeight) {
         return false;
     }
+
+    /**
+     * Create a copy of this ProcessingRecipe that can be modified without altering
+     * the original copy.
+     */
+    public abstract ProcessingRecipeInput copy();
 }
