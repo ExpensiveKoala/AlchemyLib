@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  * some basic helper methods so that you don't need to build your own from
  * scratch for each mod.
  *
- * <p>Extend AlchemyPacket to easily create your own. Use the builtin packets
+ * <p>Implement AlchemyPacket to easily create your own. Use the builtin packets
  * as an example for how they should work.</p>
  *
  * @see AlchemyPacketHandler
@@ -101,7 +101,7 @@ public abstract class AbstractPacketHandler {
     public abstract AbstractPacketHandler register();
 
     /**
-     * Sends the packet passed as a parameter to the server via your {@link SimpleChannel}.
+     * Sends the packet passed as a parameter to the server via {@link PacketDistributor}.
      *
      * @param pMessage Your packet to send to the server.
      * @param <T> extends AlchemyPacket
@@ -113,7 +113,7 @@ public abstract class AbstractPacketHandler {
     }
 
     /**
-     * Sends a packet to the specific player specified in parameters via your {@link SimpleChannel}.
+     * Sends a packet to the specific player specified in parameters via {@link PacketDistributor}.
      *
      * @param pMessage Your packet to send to the player.
      * @param pPlayer And instance of ServerPlayer.
@@ -127,7 +127,7 @@ public abstract class AbstractPacketHandler {
 
     /**
      * Sends the packet passed as a parameter to all players connected to the server via
-     * your {@link SimpleChannel}. Note: this will work if you are in a single player instance,
+     * {@link PacketDistributor}. Note: this will work if you are in a single player instance,
      * LAN, or a dedicated server.
      *
      * @param pMessage Your packet to send to all players.
@@ -142,6 +142,7 @@ public abstract class AbstractPacketHandler {
      * in the {@link Level} parameter.
      *
      * @param pMessage Your packet to send.
+     * @param pExclude A nullable ServerPlayer to exclude from receiving the packet.
      * @param pLevel An instance of the Level (overworld, nether, end, etc) used to determine the context
      *               of the BlockPos parameter.
      * @param pBlockPos BlockPos that is the center location for where to send the packet.
@@ -149,12 +150,12 @@ public abstract class AbstractPacketHandler {
      * @param <T> AlchemyPacket
      *
      */
-    public <T extends AlchemyPacket<T>> void sendToNear(T pMessage, @Nullable ServerPlayer exclude, ServerLevel pLevel, BlockPos pBlockPos, double pRadius) {
+    public <T extends AlchemyPacket<T>> void sendToNear(T pMessage, @Nullable ServerPlayer pExclude, ServerLevel pLevel, BlockPos pBlockPos, double pRadius) {
         ResourceKey<Level> dimension = pLevel.dimension();
         double posX = pBlockPos.getX();
         double posY = pBlockPos.getY();
         double posZ = pBlockPos.getZ();
-        PacketDistributor.sendToPlayersNear(pLevel, exclude, posX, posY, posZ, pRadius, new AlchemyPacketPayload<>(pMessage));
+        PacketDistributor.sendToPlayersNear(pLevel, pExclude, posX, posY, posZ, pRadius, new AlchemyPacketPayload<>(pMessage));
     }
 
     /**
