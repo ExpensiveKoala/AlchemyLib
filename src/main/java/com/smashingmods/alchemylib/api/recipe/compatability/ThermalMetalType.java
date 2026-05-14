@@ -18,8 +18,8 @@ public enum ThermalMetalType implements StringRepresentable {
 
     private final String type;
 
-    ThermalMetalType(String pType) {
-        this.type = pType;
+    ThermalMetalType(String type) {
+        this.type = type;
     }
 
     @Override

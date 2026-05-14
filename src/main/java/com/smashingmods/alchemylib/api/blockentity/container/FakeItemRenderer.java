@@ -8,22 +8,22 @@ import net.minecraft.world.item.ItemStack;
 @SuppressWarnings("unused")
 public class FakeItemRenderer {
 
-    public static void renderFakeItem(GuiGraphics pGuiGraphics, ItemStack pItemStack, int pX, int pY) {
-        renderFakeItem(pGuiGraphics, pItemStack, pX, pY, true, false);
+    public static void renderFakeItem(GuiGraphics guiGraphics, ItemStack itemStack, int x, int y) {
+        renderFakeItem(guiGraphics, itemStack, x, y, true, false);
     }
 
-    public static void renderFakeItem(GuiGraphics pGuiGraphics, ItemStack pItemStack, int pX, int pY, boolean pDrawItemDecorations) {
-        renderFakeItem(pGuiGraphics, pItemStack, pX, pY, true, pDrawItemDecorations);
+    public static void renderFakeItem(GuiGraphics guiGraphics, ItemStack itemStack, int x, int y, boolean drawItemDecorations) {
+        renderFakeItem(guiGraphics, itemStack, x, y, true, drawItemDecorations);
     }
 
-    public static void renderFakeItem(GuiGraphics pGuiGraphics, ItemStack pItemStack, int pX, int pY, boolean pSemiTransparent, boolean pDrawItemDecorations) {
-        pGuiGraphics.renderFakeItem(pItemStack, pX, pY);
-        if (pSemiTransparent) {
-            pGuiGraphics.fill(RenderType.guiGhostRecipeOverlay(), pX, pY, pX + 16, pY + 16, 0x88888888);
+    public static void renderFakeItem(GuiGraphics guiGraphics, ItemStack itemStack, int x, int y, boolean semiTransparent, boolean drawItemDecorations) {
+        guiGraphics.renderFakeItem(itemStack, x, y);
+        if (semiTransparent) {
+            guiGraphics.fill(RenderType.guiGhostRecipeOverlay(), x, y, x + 16, y + 16, 0x88888888);
         }
 
-        if (pDrawItemDecorations) {
-            pGuiGraphics.renderItemDecorations(Minecraft.getInstance().font, pItemStack, pX, pY);
+        if (drawItemDecorations) {
+            guiGraphics.renderItemDecorations(Minecraft.getInstance().font, itemStack, x, y);
         }
     }
 }

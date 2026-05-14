@@ -13,21 +13,21 @@ import net.neoforged.neoforge.items.wrapper.PlayerInvWrapper;
 @SuppressWarnings("unused")
 public class ProcessingSlotHandler extends ItemStackHandler {
 
-    public ProcessingSlotHandler(int pSize) {
-        super(pSize);
+    public ProcessingSlotHandler(int size) {
+        super(size);
     }
 
     /**
      * Increments the count of the ItemStack in the given slot of this handler by the ammount.
      */
-    public void incrementSlot(int pSlot, int pAmount) {
-        ItemStack temp = this.getStackInSlot(pSlot);
+    public void incrementSlot(int slot, int amount) {
+        ItemStack temp = this.getStackInSlot(slot);
 
-        if (temp.getCount() + pAmount <= temp.getMaxStackSize()) {
-            temp.setCount(temp.getCount() + pAmount);
+        if (temp.getCount() + amount <= temp.getMaxStackSize()) {
+            temp.setCount(temp.getCount() + amount);
         }
 
-        this.setStackInSlot(pSlot, temp);
+        this.setStackInSlot(slot, temp);
     }
 
     /**
@@ -35,15 +35,15 @@ public class ProcessingSlotHandler extends ItemStackHandler {
      * ItemStack, it increments it by the ItemStack's count. If that slot isn't empty,
      * this method does nothing.
      *
-     * @param pSlot Integer value representing this item handler's slot.
-     * @param pItemStack {@link ItemStack}
+     * @param slot Integer value representing this item handler's slot.
+     * @param itemStack {@link ItemStack}
      */
-    public void setOrIncrement(int pSlot, ItemStack pItemStack) {
-        if (!pItemStack.isEmpty()) {
-            if (getStackInSlot(pSlot).isEmpty()) {
-                setStackInSlot(pSlot, pItemStack);
+    public void setOrIncrement(int slot, ItemStack itemStack) {
+        if (!itemStack.isEmpty()) {
+            if (getStackInSlot(slot).isEmpty()) {
+                setStackInSlot(slot, itemStack);
             } else {
-                incrementSlot(pSlot, pItemStack.getCount());
+                incrementSlot(slot, itemStack.getCount());
             }
         }
     }
@@ -52,20 +52,20 @@ public class ProcessingSlotHandler extends ItemStackHandler {
      * This method is used to decrement the count of the ItemStack in this handler's slot.
      * If it decrements to 0, the slot's ItemStack is set to EMPTY.
      *
-     * @param pSlot Integer value representing this item handler's slot.
-     * @param pAmount Integer value for how much to decrease the size of the ItemStack in the slot.
+     * @param slot Integer value representing this item handler's slot.
+     * @param amount Integer value for how much to decrease the size of the ItemStack in the slot.
      */
-    public void decrementSlot(int pSlot, int pAmount) {
-        ItemStack temp = this.getStackInSlot(pSlot);
+    public void decrementSlot(int slot, int amount) {
+        ItemStack temp = this.getStackInSlot(slot);
 
         if (temp.isEmpty()) return;
-        if (temp.getCount() - pAmount < 0) return;
+        if (temp.getCount() - amount < 0) return;
 
-        temp.shrink(pAmount);
+        temp.shrink(amount);
         if (temp.getCount() <= 0) {
-            this.setStackInSlot(pSlot, ItemStack.EMPTY);
+            this.setStackInSlot(slot, ItemStack.EMPTY);
         } else {
-            this.setStackInSlot(pSlot, temp);
+            this.setStackInSlot(slot, temp);
         }
     }
 
@@ -75,12 +75,12 @@ public class ProcessingSlotHandler extends ItemStackHandler {
      * of the process. Consumers of this method will need to verify that the Inventory has
      * space for all ItemStacks held by this handler.
      *
-     * @param pInventory {@link Inventory}
+     * @param inventory {@link Inventory}
      */
-    public void emptyToInventory(Inventory pInventory) {
+    public void emptyToInventory(Inventory inventory) {
         for (int i = 0; i < this.stacks.size(); i++) {
             if (!getStackInSlot(i).isEmpty()) {
-                ItemHandlerHelper.insertItemStacked(new PlayerInvWrapper(pInventory), getStackInSlot(i), false);
+                ItemHandlerHelper.insertItemStacked(new PlayerInvWrapper(inventory), getStackInSlot(i), false);
                 setStackInSlot(i, ItemStack.EMPTY);
             }
         }

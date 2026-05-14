@@ -58,18 +58,18 @@ public interface InventoryBlockEntity {
      * items aren't voided / deleted. You can override this for different behavior or to add other inventories
      * to be dropped.
      *
-     * @param pLevel Level where the block entity will drop its contents. Theoretically you could set this
+     * @param level Level where the block entity will drop its contents. Theoretically you could set this
      *               to a random place in the end, but why would you do that, you monster!
-     * @param pPos Position in the level to drop contents.
+     * @param pos Position in the level to drop contents.
      */
-    default void dropContents(Level pLevel, BlockPos pPos) {
-        if (!pLevel.isClientSide()) {
+    default void dropContents(Level level, BlockPos pos) {
+        if (!level.isClientSide()) {
             IItemHandler combinedHandler = getCombinedSlotHandler().getView(null);
             SimpleContainer container = new SimpleContainer(combinedHandler.getSlots());
             for (int i = 0; i < combinedHandler.getSlots(); i++) {
                 container.setItem(i, combinedHandler.getStackInSlot(i));
             }
-            Containers.dropContents(pLevel, pPos, container);
+            Containers.dropContents(level, pos, container);
         }
     }
 }

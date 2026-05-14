@@ -26,14 +26,14 @@ public record ToggleLockButtonPacket(BlockPos blockPos, boolean locked) implemen
         }
 
         @Override
-        public void encode(ToggleLockButtonPacket packet, RegistryFriendlyByteBuf pBuffer) {
-            pBuffer.writeBlockPos(packet.blockPos);
-            pBuffer.writeBoolean(packet.locked);
+        public void encode(ToggleLockButtonPacket packet, RegistryFriendlyByteBuf buf) {
+            buf.writeBlockPos(packet.blockPos);
+            buf.writeBoolean(packet.locked);
         }
 
         @Override
-        public void handle(ToggleLockButtonPacket message, IPayloadContext pContext) {
-            Player player = pContext.player();
+        public void handle(ToggleLockButtonPacket message, IPayloadContext context) {
+            Player player = context.player();
             AbstractProcessingBlockEntity blockEntity = (AbstractProcessingBlockEntity) player.level().getBlockEntity(message.blockPos());
 
             if (blockEntity != null) {

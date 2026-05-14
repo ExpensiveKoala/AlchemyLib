@@ -14,9 +14,9 @@ public class EnergyDisplayData extends AbstractDisplayData {
 
     private final AbstractProcessingBlockEntity blockEntity;
 
-    public EnergyDisplayData(AbstractProcessingBlockEntity pBlockEntity, int pX, int pY, int pWidth, int pHeight) {
-        super(pX, pY, pWidth, pHeight);
-        this.blockEntity = pBlockEntity;
+    public EnergyDisplayData(AbstractProcessingBlockEntity blockEntity, int x, int y, int width, int height) {
+        super(x, y, width, height);
+        this.blockEntity = blockEntity;
     }
 
     @Override

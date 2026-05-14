@@ -16,8 +16,8 @@ public enum MetalTagType implements StringRepresentable {
 
     private final String type;
 
-    MetalTagType(String pType) {
-        this.type = pType;
+    MetalTagType(String type) {
+        this.type = type;
     }
 
     @Override

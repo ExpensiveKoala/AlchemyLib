@@ -18,14 +18,14 @@ import java.util.Objects;
 
 public class RecipeDisplayUtil {
 
-    public static List<Component> getItemTooltipComponent(ItemStack pItemStack, MutableComponent pComponent) {
+    public static List<Component> getItemTooltipComponent(ItemStack itemStack, MutableComponent component) {
         List<Component> components = new ArrayList<>();
-        String namespace = StringUtils.capitalize(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(pItemStack.getItem())).getNamespace());
+        String namespace = StringUtils.capitalize(Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(itemStack.getItem())).getNamespace());
 
-        components.add(pComponent.withStyle(ChatFormatting.UNDERLINE, ChatFormatting.YELLOW));
-        components.add(Component.literal(String.format("%dx %s", pItemStack.getCount(), pItemStack.getItem().getDescription().getString())));
+        components.add(component.withStyle(ChatFormatting.UNDERLINE, ChatFormatting.YELLOW));
+        components.add(Component.literal(String.format("%dx %s", itemStack.getCount(), itemStack.getItem().getDescription().getString())));
 
-        if (pItemStack.getItem() instanceof Chemical chemical) {
+        if (itemStack.getItem() instanceof Chemical chemical) {
 
             String abbreviation = chemical.getAbbreviation();
 

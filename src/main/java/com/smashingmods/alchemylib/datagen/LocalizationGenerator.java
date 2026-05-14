@@ -6,8 +6,8 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
 
 public class LocalizationGenerator extends LanguageProvider {
 
-    public LocalizationGenerator(PackOutput pOutput) {
-        super(pOutput, AlchemyLib.MODID, "en_us");
+    public LocalizationGenerator(PackOutput output) {
+        super(output, AlchemyLib.MODID, "en_us");
     }
 
     @Override

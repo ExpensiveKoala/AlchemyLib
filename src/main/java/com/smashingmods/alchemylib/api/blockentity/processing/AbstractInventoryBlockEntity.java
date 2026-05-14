@@ -16,8 +16,8 @@ public abstract class AbstractInventoryBlockEntity extends AbstractProcessingBlo
     private final ProcessingSlotHandler outputHandler = initializeOutputHandler();
     private final SidedProcessingSlotWrapper combinedHandler = new SidedProcessingSlotWrapper(inputHandler, outputHandler);
 
-    public AbstractInventoryBlockEntity(String pModId, BlockEntityType<?> pBlockEntityType, BlockPos pWorldPosition, BlockState pBlockState) {
-        super(pModId, pBlockEntityType, pWorldPosition, pBlockState);
+    public AbstractInventoryBlockEntity(String modId, BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
+        super(modId, type, pos, blockState);
     }
 
     @Override
@@ -44,20 +44,20 @@ public abstract class AbstractInventoryBlockEntity extends AbstractProcessingBlo
     }
 
     @Override
-    protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider registries) {
-        pTag.put("input", inputHandler.serializeNBT(registries));
-        pTag.put("output", outputHandler.serializeNBT(registries));
-        pTag.putShort("sides", combinedHandler.sideModesToShort());
-        super.saveAdditional(pTag, registries);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        tag.put("input", inputHandler.serializeNBT(registries));
+        tag.put("output", outputHandler.serializeNBT(registries));
+        tag.putShort("sides", combinedHandler.sideModesToShort());
+        super.saveAdditional(tag, registries);
     }
 
     @Override
-    public void loadAdditional(CompoundTag pTag, HolderLookup.Provider registries) {
-        super.loadAdditional(pTag, registries);
-        inputHandler.deserializeNBT(registries, pTag.getCompound("input"));
-        outputHandler.deserializeNBT(registries, pTag.getCompound("output"));
-        if (pTag.contains("sides")) {
-            combinedHandler.setSideModesFromShort(pTag.getShort("sides"));
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        inputHandler.deserializeNBT(registries, tag.getCompound("input"));
+        outputHandler.deserializeNBT(registries, tag.getCompound("output"));
+        if (tag.contains("sides")) {
+            combinedHandler.setSideModesFromShort(tag.getShort("sides"));
         } else {
             combinedHandler.setSideModesFromShort(SidedProcessingSlotWrapper.LEGACY_SIDES_CONFIGURATION);
         }

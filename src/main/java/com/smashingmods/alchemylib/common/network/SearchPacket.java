@@ -26,14 +26,14 @@ public record SearchPacket(BlockPos blockPos, String searchText) implements Alch
         }
 
         @Override
-        public void encode(SearchPacket packet, RegistryFriendlyByteBuf pBuffer) {
-            pBuffer.writeBlockPos(packet.blockPos);
-            pBuffer.writeUtf(packet.searchText);
+        public void encode(SearchPacket packet, RegistryFriendlyByteBuf buf) {
+            buf.writeBlockPos(packet.blockPos);
+            buf.writeUtf(packet.searchText);
         }
 
         @Override
-        public void handle(SearchPacket message, IPayloadContext pContext) {
-            Player player = pContext.player();
+        public void handle(SearchPacket message, IPayloadContext context) {
+            Player player = context.player();
             AbstractSearchableBlockEntity blockEntity = (AbstractSearchableBlockEntity) player.level().getBlockEntity(message.blockPos);
 
             if (blockEntity != null) {

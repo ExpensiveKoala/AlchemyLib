@@ -15,29 +15,29 @@ import net.minecraft.resources.ResourceLocation;
 @SuppressWarnings("unused")
 public class SideModeButton extends AbstractAlchemyButton {
 
-    public SideModeButton(AbstractProcessingScreen<?> pParent, Screen pNewScreen) {
-        super(pParent, pButton -> {
-            ProcessingBlockEntity blockEntity = pParent.getBlockEntity();
+    public SideModeButton(AbstractProcessingScreen<?> parent, Screen newScreen) {
+        super(parent, button -> {
+            ProcessingBlockEntity blockEntity = parent.getBlockEntity();
             if (blockEntity.isSideConfigScreenOpen()) {
                 Minecraft.getInstance().popGuiLayer();
                 blockEntity.setSideConfigScreenState(false);
             } else {
                 if (!(blockEntity instanceof SearchableBlockEntity searchableBlockEntity) || !searchableBlockEntity.isRecipeSelectorOpen()) {
                     blockEntity.setSideConfigScreenState(true);
-                    Minecraft.getInstance().pushGuiLayer(pNewScreen);
+                    Minecraft.getInstance().pushGuiLayer(newScreen);
                 }
             }
         });
     }
 
     @Override
-    public void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         boolean open = parent.getBlockEntity().isSideConfigScreenOpen();
         int u = open ? 25 : 85;
         int v = open ? 80 : 0;
 
-        pGuiGraphics.blit(ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "textures/gui/widgets.png"), getX(), getY(), u, v, width, height);
-        renderButtonTooltip(pGuiGraphics, pMouseX, pMouseY);
+        guiGraphics.blit(ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "textures/gui/widgets.png"), getX(), getY(), u, v, width, height);
+        renderButtonTooltip(guiGraphics, mouseX, mouseY);
     }
 
     @Override

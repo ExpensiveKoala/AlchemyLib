@@ -49,9 +49,9 @@ public interface ProcessingBlockEntity {
     boolean getCanProcess();
 
     /**
-     * @param pCanProcess {@link #canProcessRecipe()}
+     * @param canProcess {@link #canProcessRecipe()}
      */
-    void setCanProcess(boolean pCanProcess);
+    void setCanProcess(boolean canProcess);
 
     /**
      * Call this method when progress has reached max progress. The method body should handle decrementing ItemStacks or
@@ -64,10 +64,10 @@ public interface ProcessingBlockEntity {
     void processRecipe();
 
     /**
-     * @param pRecipe The {@link AbstractProcessingRecipe} to set for the machine. Can be set to null.
+     * @param recipe The {@link AbstractProcessingRecipe} to set for the machine. Can be set to null.
      * @param <R> {@link AbstractProcessingRecipe}
      */
-    <R extends AbstractProcessingRecipe> void setRecipe(@Nullable R pRecipe);
+    <R extends AbstractProcessingRecipe> void setRecipe(@Nullable R recipe);
 
     /**
      * @param <R> {@link AbstractProcessingRecipe} - All AlchemyLib machines must use this recipe object.
@@ -93,7 +93,7 @@ public interface ProcessingBlockEntity {
     /**
      * Set the exact progress of the machine. This is typically used for loading data from persistent storage.
      */
-    void setProgress(int pProgress);
+    void setProgress(int progress);
 
     /**
      * @return Integer value of the machine implementations max progress.
@@ -103,7 +103,7 @@ public interface ProcessingBlockEntity {
     /**
      * This should be set when creating the machine object.
      */
-    void setMaxProgress(int pMaxProgress);
+    void setMaxProgress(int maxProgress);
 
     /**
      * Implement to increment the progress of the machine. This should be called in the machine's tick method to increase
@@ -119,10 +119,10 @@ public interface ProcessingBlockEntity {
     boolean isRecipeLocked();
 
     /**
-     * @param pRecipeLocked Boolean to lock the recipe so that it can't be changed. Check {@link #isRecipeLocked()} when attempting
+     * @param recipeLocked Boolean to lock the recipe so that it can't be changed. Check {@link #isRecipeLocked()} when attempting
      *                      to update the recipe.
      */
-    void setRecipeLocked(boolean pRecipeLocked);
+    void setRecipeLocked(boolean recipeLocked);
 
     /**
      * @return Boolean if processing is set to paused.
@@ -132,9 +132,9 @@ public interface ProcessingBlockEntity {
     boolean isProcessingPaused();
 
     /**
-     * @param pPaused Boolean to pause the processing of the machine. Check {@link #isProcessingPaused()} when attempting to process.
+     * @param paused Boolean to pause the processing of the machine. Check {@link #isProcessingPaused()} when attempting to process.
      */
-    void setPaused(boolean pPaused);
+    void setPaused(boolean paused);
 
     /**
      *
@@ -144,7 +144,7 @@ public interface ProcessingBlockEntity {
 
     /**
      *
-     * @param pState Set the current open/closed state of the IO Configuration screen.
+     * @param state Set the current open/closed state of the IO Configuration screen.
      */
-    void setSideConfigScreenState(boolean pState);
+    void setSideConfigScreenState(boolean state);
 }

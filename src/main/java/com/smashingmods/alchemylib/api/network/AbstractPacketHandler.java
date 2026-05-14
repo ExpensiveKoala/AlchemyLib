@@ -103,26 +103,26 @@ public abstract class AbstractPacketHandler {
     /**
      * Sends the packet passed as a parameter to the server via {@link PacketDistributor}.
      *
-     * @param pMessage Your packet to send to the server.
+     * @param message Your packet to send to the server.
      * @param <T> extends AlchemyPacket
      *
      * @see AlchemyPacketHandler
      */
-    public <T extends AlchemyPacket<T>> void sendToServer(T pMessage) {
-        PacketDistributor.sendToServer(new AlchemyPacketPayload<>(pMessage));
+    public <T extends AlchemyPacket<T>> void sendToServer(T message) {
+        PacketDistributor.sendToServer(new AlchemyPacketPayload<>(message));
     }
 
     /**
      * Sends a packet to the specific player specified in parameters via {@link PacketDistributor}.
      *
-     * @param pMessage Your packet to send to the player.
-     * @param pPlayer And instance of ServerPlayer.
+     * @param message Your packet to send to the player.
+     * @param serverPlayer And instance of ServerPlayer.
      * @param <T> AlchemyPacket
      *
      * @see AlchemyPacketHandler
      */
-    public <T extends AlchemyPacket<T>> void sendToPlayer(T pMessage, ServerPlayer pPlayer) {
-        PacketDistributor.sendToPlayer(pPlayer, new AlchemyPacketPayload<>(pMessage));
+    public <T extends AlchemyPacket<T>> void sendToPlayer(T message, ServerPlayer serverPlayer) {
+        PacketDistributor.sendToPlayer(serverPlayer, new AlchemyPacketPayload<>(message));
     }
 
     /**
@@ -130,49 +130,49 @@ public abstract class AbstractPacketHandler {
      * {@link PacketDistributor}. Note: this will work if you are in a single player instance,
      * LAN, or a dedicated server.
      *
-     * @param pMessage Your packet to send to all players.
+     * @param message Your packet to send to all players.
      * @param <T> AlchemyPacket
      */
-    public <T extends AlchemyPacket<T>> void sendToAll(T pMessage) {
-        PacketDistributor.sendToAllPlayers(new AlchemyPacketPayload<>(pMessage));
+    public <T extends AlchemyPacket<T>> void sendToAll(T message) {
+        PacketDistributor.sendToAllPlayers(new AlchemyPacketPayload<>(message));
     }
 
     /**
      * Sends the packet passed as a parameter to all players within a radius of the passed {@link BlockPos}
      * in the {@link Level} parameter.
      *
-     * @param pMessage Your packet to send.
-     * @param pExclude A nullable ServerPlayer to exclude from receiving the packet.
-     * @param pLevel An instance of the Level (overworld, nether, end, etc) used to determine the context
+     * @param message Your packet to send.
+     * @param exclude A nullable ServerPlayer to exclude from receiving the packet.
+     * @param serverLevel An instance of the Level (overworld, nether, end, etc) used to determine the context
      *               of the BlockPos parameter.
-     * @param pBlockPos BlockPos that is the center location for where to send the packet.
-     * @param pRadius Distance in blocks from the center BlockPos, the packet is sent to everyone in this radius.
+     * @param pos BlockPos that is the center location for where to send the packet.
+     * @param radius Distance in blocks from the center BlockPos, the packet is sent to everyone in this radius.
      * @param <T> AlchemyPacket
      *
      */
-    public <T extends AlchemyPacket<T>> void sendToNear(T pMessage, @Nullable ServerPlayer pExclude, ServerLevel pLevel, BlockPos pBlockPos, double pRadius) {
-        ResourceKey<Level> dimension = pLevel.dimension();
-        double posX = pBlockPos.getX();
-        double posY = pBlockPos.getY();
-        double posZ = pBlockPos.getZ();
-        PacketDistributor.sendToPlayersNear(pLevel, pExclude, posX, posY, posZ, pRadius, new AlchemyPacketPayload<>(pMessage));
+    public <T extends AlchemyPacket<T>> void sendToNear(T message, @Nullable ServerPlayer exclude, ServerLevel serverLevel, BlockPos pos, double radius) {
+        ResourceKey<Level> dimension = serverLevel.dimension();
+        double posX = pos.getX();
+        double posY = pos.getY();
+        double posZ = pos.getZ();
+        PacketDistributor.sendToPlayersNear(serverLevel, exclude, posX, posY, posZ, radius, new AlchemyPacketPayload<>(message));
     }
 
     /**
      * Sends the packet to all players that are tracking a specific chunk based on the passed {@link Level} and {@link BlockPos}.
      * All players that are tracking the chunk of the BlockPos will receive the packet.
      *
-     * @param pMessage Your packet to send.
-     * @param pLevel An instance of the Level (overworld, nether, end, etc) used to determine the context
+     * @param message Your packet to send.
+     * @param serverLevel An instance of the Level (overworld, nether, end, etc) used to determine the context
      *               of the BlockPos parameter.
-     * @param pBlockPos BlockPos used to find the chunk being tracked.
+     * @param pos BlockPos used to find the chunk being tracked.
      * @param <T> AlchemyPacket
      *
      * @see Level
      * @see BlockPos
      */
-    public <T extends AlchemyPacket<T>> void sendToTrackingChunk(T pMessage, ServerLevel pLevel, BlockPos pBlockPos) {
-        LevelChunk levelChunk = pLevel.getChunkAt(pBlockPos);
-        PacketDistributor.sendToPlayersTrackingChunk(pLevel, levelChunk.getPos(), new AlchemyPacketPayload<>(pMessage));
+    public <T extends AlchemyPacket<T>> void sendToTrackingChunk(T message, ServerLevel serverLevel, BlockPos pos) {
+        LevelChunk levelChunk = serverLevel.getChunkAt(pos);
+        PacketDistributor.sendToPlayersTrackingChunk(serverLevel, levelChunk.getPos(), new AlchemyPacketPayload<>(message));
     }
 }

@@ -15,10 +15,10 @@ public class ProgressDisplayData extends AbstractDisplayData {
     private final AbstractProcessingBlockEntity blockEntity;
     private final Direction2D direction2D;
 
-    public ProgressDisplayData(AbstractProcessingBlockEntity pBlockEntity, int pX, int pY, int pWidth, int pHeight, Direction2D pDirection2D) {
-        super(pX, pY, pWidth, pHeight);
-        this.blockEntity = pBlockEntity;
-        this.direction2D = pDirection2D;
+    public ProgressDisplayData(AbstractProcessingBlockEntity blockEntity, int x, int y, int width, int height, Direction2D direction2D) {
+        super(x, y, width, height);
+        this.blockEntity = blockEntity;
+        this.direction2D = direction2D;
     }
 
     @Override

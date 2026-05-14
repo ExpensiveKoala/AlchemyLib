@@ -35,9 +35,9 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
 
     private final EnergyStorageHandler energyHandler = initializeEnergyStorage();
 
-    public AbstractProcessingBlockEntity(String pModId, BlockEntityType<?> pBlockEntityType, BlockPos pWorldPosition, BlockState pBlockState) {
-        super(pBlockEntityType, pWorldPosition, pBlockState);
-        this.name = MutableComponent.create(new TranslatableContents(String.format("%s.container.%s", pModId, BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(getType())), null, TranslatableContents.NO_ARGS));
+    public AbstractProcessingBlockEntity(String modId, BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
+        super(type, pos, blockState);
+        this.name = MutableComponent.create(new TranslatableContents(String.format("%s.container.%s", modId, BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(getType())), null, TranslatableContents.NO_ARGS));
     }
 
     @Override
@@ -53,10 +53,10 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    public void onDataPacket(Connection pConnection, ClientboundBlockEntityDataPacket pPacket, HolderLookup.Provider lookupProvider) {
-        Objects.requireNonNull(pPacket.getTag());
-        this.loadAdditional(pPacket.getTag(), lookupProvider);
-        super.onDataPacket(pConnection, pPacket, lookupProvider);
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
+        Objects.requireNonNull(pkt.getTag());
+        this.loadAdditional(pkt.getTag(), lookupProvider);
+        super.onDataPacket(net, pkt, lookupProvider);
     }
 
     @Nullable
@@ -85,8 +85,8 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    public void setCanProcess(boolean pCanProcess) {
-        canProcess = pCanProcess;
+    public void setCanProcess(boolean canProcess) {
+        this.canProcess = canProcess;
     }
 
     @Override
@@ -95,8 +95,8 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    public void setMaxProgress(int pMaxProgress) {
-        maxProgress = pMaxProgress;
+    public void setMaxProgress(int maxProgress) {
+        this.maxProgress = maxProgress;
     }
 
     @Override
@@ -105,8 +105,8 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    public void setProgress(int pProgress) {
-        this.progress = pProgress;
+    public void setProgress(int progress) {
+        this.progress = progress;
     }
 
     @Override
@@ -120,8 +120,8 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    public void setRecipeLocked(boolean pRecipeLocked) {
-        this.recipeLocked = pRecipeLocked;
+    public void setRecipeLocked(boolean recipeLocked) {
+        this.recipeLocked = recipeLocked;
     }
 
     @Override
@@ -130,8 +130,8 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    public void setPaused(boolean pPaused) {
-        this.paused = pPaused;
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
 
     @Override
@@ -140,8 +140,8 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
     }
 
     @Override
-    public void setSideConfigScreenState(boolean pState) {
-        this.ioScreenOpen = pState;
+    public void setSideConfigScreenState(boolean state) {
+        this.ioScreenOpen = state;
     }
 
     @Override
@@ -153,8 +153,8 @@ public abstract class AbstractProcessingBlockEntity extends BlockEntity implemen
         return energyPerTick;
     }
 
-    public void setEnergyPerTick(int pEnergyPerTick) {
-        energyPerTick = pEnergyPerTick;
+    public void setEnergyPerTick(int energyPerTick) {
+        this.energyPerTick = energyPerTick;
     }
 
     @Override

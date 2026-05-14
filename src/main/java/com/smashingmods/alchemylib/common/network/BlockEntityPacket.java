@@ -30,13 +30,13 @@ public record BlockEntityPacket(BlockPos blockPos, CompoundTag tag) implements A
         }
 
         @Override
-        public void encode(BlockEntityPacket packet, RegistryFriendlyByteBuf pBuffer) {
-            pBuffer.writeBlockPos(packet.blockPos);
-            pBuffer.writeNbt(packet.tag);
+        public void encode(BlockEntityPacket packet, RegistryFriendlyByteBuf buf) {
+            buf.writeBlockPos(packet.blockPos);
+            buf.writeNbt(packet.tag);
         }
 
         @Override
-        public void handle(BlockEntityPacket message, IPayloadContext pContext) {
+        public void handle(BlockEntityPacket message, IPayloadContext context) {
             Level level = Minecraft.getInstance().level;
             BlockEntity blockEntity = Objects.requireNonNull(level).getBlockEntity(message.blockPos);
             Objects.requireNonNull(blockEntity).loadCustomOnly(message.tag, level.registryAccess());

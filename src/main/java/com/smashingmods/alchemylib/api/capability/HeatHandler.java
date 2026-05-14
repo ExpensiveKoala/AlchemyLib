@@ -10,8 +10,8 @@ public class HeatHandler implements HeatCapability {
     private int heat;
     private final int maxHeat;
 
-    public HeatHandler(int pMax) {
-        this.maxHeat = pMax;
+    public HeatHandler(int max) {
+        this.maxHeat = max;
     }
 
     @Override
@@ -20,25 +20,25 @@ public class HeatHandler implements HeatCapability {
     }
 
     @Override
-    public void setHeat(int pHeat) {
-        this.heat = pHeat;
+    public void setHeat(int heat) {
+        this.heat = heat;
     }
 
     @Override
-    public void increment(int pHeat) {
-        if (heat + pHeat <= maxHeat) {
-            heat += pHeat;
+    public void increment(int heat) {
+        if (this.heat + heat <= maxHeat) {
+            this.heat += heat;
         } else {
-            heat = maxHeat;
+            this.heat = maxHeat;
         }
     }
 
     @Override
-    public void decrement(int pHeat) {
-        if (heat - pHeat >= 0) {
-            heat -= pHeat;
+    public void decrement(int heat) {
+        if (this.heat - heat >= 0) {
+            this.heat -= heat;
         } else {
-            heat = 0;
+            this.heat = 0;
         }
     }
 

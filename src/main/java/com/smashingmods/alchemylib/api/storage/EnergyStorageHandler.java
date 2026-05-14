@@ -26,24 +26,24 @@ public class EnergyStorageHandler extends EnergyStorage {
      * Sets the energy value to the parameter value so long as that value is
      * higher than 0 and less than capacity.
      */
-    public void setEnergy(int pEnergy) {
-        this.energy = Math.clamp(pEnergy, 0, capacity);
+    public void setEnergy(int energy) {
+        this.energy = Math.clamp(energy, 0, capacity);
         onEnergyChanged();
     }
 
     /**
      * Increases the energy value by the parameter value up to capacity.
      */
-    public void addEnergy(int pEnergy) {
-        this.energy = Math.min(energy + pEnergy, capacity);
+    public void addEnergy(int energy) {
+        this.energy = Math.min(this.energy + energy, capacity);
         onEnergyChanged();
     }
 
     /**
      * Decreases the energy value by the parameter value down to 0.
      */
-    public void consumeEnergy(int pEnergy) {
-        this.energy = Math.max(energy - pEnergy, 0);
+    public void consumeEnergy(int energy) {
+        this.energy = Math.max(this.energy - energy, 0);
         onEnergyChanged();
     }
 }

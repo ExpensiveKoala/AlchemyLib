@@ -12,19 +12,19 @@ import net.minecraft.resources.ResourceLocation;
 @SuppressWarnings("unused")
 public class LockButton extends AbstractAlchemyButton {
 
-    public LockButton(AbstractProcessingScreen<?> pParent) {
-        super(pParent, pButton -> {
-            boolean toggleLock = !pParent.getBlockEntity().isRecipeLocked();
-            pParent.getBlockEntity().setRecipeLocked(toggleLock);
-            pParent.getBlockEntity().setChanged();
-            AlchemyLib.getPacketHandler().sendToServer(new ToggleLockButtonPacket(pParent.getBlockEntity().getBlockPos(), toggleLock));
+    public LockButton(AbstractProcessingScreen<?> parent) {
+        super(parent, button -> {
+            boolean toggleLock = !parent.getBlockEntity().isRecipeLocked();
+            parent.getBlockEntity().setRecipeLocked(toggleLock);
+            parent.getBlockEntity().setChanged();
+            AlchemyLib.getPacketHandler().sendToServer(new ToggleLockButtonPacket(parent.getBlockEntity().getBlockPos(), toggleLock));
         });
     }
 
     @Override
-    public void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        pGuiGraphics.blit(ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "textures/gui/widgets.png"), getX(), getY(), 25 + ((blockEntity.isRecipeLocked() ? 0 : 1) * 20), 0, width, height);
-        renderButtonTooltip(pGuiGraphics, pMouseX, pMouseY);
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        guiGraphics.blit(ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "textures/gui/widgets.png"), getX(), getY(), 25 + ((blockEntity.isRecipeLocked() ? 0 : 1) * 20), 0, width, height);
+        renderButtonTooltip(guiGraphics, mouseX, mouseY);
     }
 
     @Override

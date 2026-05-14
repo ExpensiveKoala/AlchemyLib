@@ -24,22 +24,22 @@ public interface AlchemyPacketHandler<T extends AlchemyPacket<T>> {
      * be sent across the network.
      *
      * @param packet
-     * @param pBuffer {@link RegistryFriendlyByteBuf}
+     * @param buf {@link RegistryFriendlyByteBuf}
      * @see BlockEntityPacket.Packet#encode(BlockEntityPacket, RegistryFriendlyByteBuf)
      */
-    void encode(T packet, RegistryFriendlyByteBuf pBuffer);
+    void encode(T packet, RegistryFriendlyByteBuf buf);
 
     /**
      * This method is called on the receiving end to handle the enqueued work. Whatever your packet does,
      * this is where you do it.
      *
      * @param message The {@link AlchemyPacket}
-     * @param pContext The {@link IPayloadContext}
+     * @param context The {@link IPayloadContext}
      * <p>Will be either {@link ClientPayloadContext} or {@link ServerPayloadContext} depending on if the packet is serverbound or clientbound.</p>
      *
      * @see BlockEntityPacket.Packet#handle(BlockEntityPacket, IPayloadContext)
      */
-    void handle(T message, IPayloadContext pContext);
+    void handle(T message, IPayloadContext context);
 
     /**
      * Implement this method to decode your packet's data to an {@link AlchemyPacket} with data sent across the network.

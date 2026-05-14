@@ -23,16 +23,16 @@ public abstract class AbstractDisplayData implements DisplayData {
      *
      * <p>The width and height passed here will determine the total area that is used to render the data.</p>
      *
-     * @param pX integer representing the x position on the screen.
-     * @param pY integer representing the y position on the screen.
-     * @param pWidth integer value of the width of the display data.
-     * @param pHeight integer value of the height of the display data.
+     * @param x integer representing the x position on the screen.
+     * @param y integer representing the y position on the screen.
+     * @param width integer value of the width of the display data.
+     * @param height integer value of the height of the display data.
      */
-    public AbstractDisplayData(int pX, int pY, int pWidth, int pHeight) {
-        this.x = pX;
-        this.y = pY;
-        this.width = pWidth;
-        this.height = pHeight;
+    public AbstractDisplayData(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
     }
 
     @Override

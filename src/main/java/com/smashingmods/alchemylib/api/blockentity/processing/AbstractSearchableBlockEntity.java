@@ -14,13 +14,13 @@ public abstract class AbstractSearchableBlockEntity extends AbstractInventoryBlo
     private boolean recipeSelectorOpen = false;
     private String searchText = "";
 
-    public AbstractSearchableBlockEntity(String pModId, BlockEntityType<?> pBlockEntityType, BlockPos pWorldPosition, BlockState pBlockState) {
-        super(pModId, pBlockEntityType, pWorldPosition, pBlockState);
+    public AbstractSearchableBlockEntity(String modId, BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
+        super(modId, type, pos, blockState);
     }
 
     @Override
-    public void setRecipeSelectorOpen(boolean pOpen) {
-        this.recipeSelectorOpen = pOpen;
+    public void setRecipeSelectorOpen(boolean open) {
+        this.recipeSelectorOpen = open;
     }
 
     @Override
@@ -34,24 +34,24 @@ public abstract class AbstractSearchableBlockEntity extends AbstractInventoryBlo
     }
 
     @Override
-    public void setSearchText(@Nullable String pText) {
-        if (pText != null && !pText.isEmpty()) {
-            searchText = pText;
+    public void setSearchText(@Nullable String searchText) {
+        if (searchText != null && !searchText.isEmpty()) {
+            this.searchText = searchText;
             if (level != null && level.isClientSide()) {
-                AlchemyLib.getPacketHandler().sendToServer(new SearchPacket(getBlockPos(), searchText));
+                AlchemyLib.getPacketHandler().sendToServer(new SearchPacket(getBlockPos(), this.searchText));
             }
         }
     }
 
     @Override
-    protected void saveAdditional(CompoundTag pTag, HolderLookup.Provider registries) {
-        pTag.putString("searchText", searchText);
-        super.saveAdditional(pTag, registries);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        tag.putString("searchText", searchText);
+        super.saveAdditional(tag, registries);
     }
 
     @Override
-    public void loadAdditional(CompoundTag pTag, HolderLookup.Provider registries) {
-        super.loadAdditional(pTag, registries);
-        setSearchText(pTag.getString("searchText"));
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        setSearchText(tag.getString("searchText"));
     }
 }

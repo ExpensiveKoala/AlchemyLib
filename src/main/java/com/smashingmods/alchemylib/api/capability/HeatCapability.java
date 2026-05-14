@@ -9,11 +9,11 @@ public interface HeatCapability {
 
     int getHeat();
 
-    void setHeat(int pHeat);
+    void setHeat(int heat);
 
-    void increment(int pHeat);
+    void increment(int heat);
 
-    void decrement(int pHeat);
+    void decrement(int heat);
 
     int getMaxHeat();
 

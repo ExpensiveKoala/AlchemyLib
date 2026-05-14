@@ -14,7 +14,7 @@ public interface SearchableBlockEntity {
      *
      * @see com.smashingmods.alchemylib.client.button.RecipeSelectorButton RecipeSelectorButton
      */
-    void setRecipeSelectorOpen(boolean pOpen);
+    void setRecipeSelectorOpen(boolean open);
 
     boolean isRecipeSelectorOpen();
 
@@ -24,7 +24,7 @@ public interface SearchableBlockEntity {
     String getSearchText();
 
     /**
-     * @param pText Text to set for the block entity's {@link net.minecraft.client.gui.components.EditBox EditBox}.
+     * @param searchText Text to set for the block entity's {@link net.minecraft.client.gui.components.EditBox EditBox}.
      */
-    void setSearchText(String pText);
+    void setSearchText(String searchText);
 }

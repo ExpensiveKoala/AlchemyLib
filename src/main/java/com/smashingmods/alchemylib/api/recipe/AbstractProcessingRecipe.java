@@ -17,7 +17,7 @@ public abstract class AbstractProcessingRecipe<T extends ProcessingRecipeInput> 
      * class if another return is necessary.
      */
     @Override
-    public boolean matches(T pContainer, Level pLevel) {
+    public boolean matches(T input, Level level) {
         return false;
     }
 
@@ -26,7 +26,7 @@ public abstract class AbstractProcessingRecipe<T extends ProcessingRecipeInput> 
      * crafting ignores this in favor of handling this logic within block entities.
      */
     @Override
-    public ItemStack assemble(T pContainer, HolderLookup.Provider registries) {
+    public ItemStack assemble(T input, HolderLookup.Provider registries) {
         return ItemStack.EMPTY;
     }
 
@@ -44,7 +44,7 @@ public abstract class AbstractProcessingRecipe<T extends ProcessingRecipeInput> 
      * for custom crafting methods. Therefore, this simply returns false in all cases.
      */
     @Override
-    public boolean canCraftInDimensions(int pWidth, int pHeight) {
+    public boolean canCraftInDimensions(int width, int height) {
         return false;
     }
 

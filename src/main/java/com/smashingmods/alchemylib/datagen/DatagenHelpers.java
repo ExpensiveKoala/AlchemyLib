@@ -23,42 +23,42 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class DatagenHelpers {
 
-    public static void itemToJson(JsonObject pJson, String pKey, ItemLike pItem) {
-        itemStackToJson(pJson, pKey, new ItemStack(pItem));
+    public static void itemToJson(JsonObject jsonObject, String key, ItemLike itemLike) {
+        itemStackToJson(jsonObject, key, new ItemStack(itemLike));
     }
 
-    public static void itemStackToJson(JsonObject pJson, String pKey, ItemStack pItemStack) {
-        if (!pItemStack.isEmpty()) {
+    public static void itemStackToJson(JsonObject jsonObject, String key, ItemStack itemStack) {
+        if (!itemStack.isEmpty()) {
 
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("item", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(pItemStack.getItem())).toString());
+            JsonObject itemStackObject = new JsonObject();
+            itemStackObject.addProperty("item", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(itemStack.getItem())).toString());
 
-            if (pItemStack.getCount() > 1) {
-                jsonObject.addProperty("count", pItemStack.getCount());
+            if (itemStack.getCount() > 1) {
+                itemStackObject.addProperty("count", itemStack.getCount());
             }
-            pJson.add(pKey, jsonObject);
+            jsonObject.add(key, itemStackObject);
         }
     }
 
-    public static void itemStackListToJson(JsonObject pJson, String pKey, List<ItemStack> pItemStackList) {
-        if (!pItemStackList.isEmpty()) {
+    public static void itemStackListToJson(JsonObject jsonObject, String key, List<ItemStack> itemStacks) {
+        if (!itemStacks.isEmpty()) {
 
             JsonArray jsonArray = new JsonArray();
 
-            for (ItemStack itemStack : pItemStackList) {
+            for (ItemStack itemStack : itemStacks) {
 
-                JsonObject jsonObject = new JsonObject();
+                JsonObject itemStackObject = new JsonObject();
                 if (itemStack != null) {
-                    jsonObject.addProperty("item", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(itemStack.getItem())).toString());
+                    itemStackObject.addProperty("item", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(itemStack.getItem())).toString());
                     if (itemStack.getCount() > 1) {
-                        jsonObject.addProperty("count", itemStack.getCount());
+                        itemStackObject.addProperty("count", itemStack.getCount());
                     }
                 } else {
-                    jsonObject.addProperty("item", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(ItemStack.EMPTY.getItem())).toString());
+                    itemStackObject.addProperty("item", Objects.requireNonNull(BuiltInRegistries.ITEM.getKey(ItemStack.EMPTY.getItem())).toString());
                 }
-                jsonArray.add(jsonObject);
+                jsonArray.add(itemStackObject);
             }
-            pJson.add(pKey, jsonArray);
+            jsonObject.add(key, jsonArray);
         }
     }
 

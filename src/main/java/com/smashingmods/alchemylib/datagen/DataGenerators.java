@@ -5,9 +5,9 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 public class DataGenerators {
 
-    public static void gatherData(GatherDataEvent pEvent) {
-        DataGenerator generator = pEvent.getGenerator();
+    public static void gatherData(GatherDataEvent event) {
+        DataGenerator generator = event.getGenerator();
 
-        generator.addProvider(pEvent.includeServer(), new LocalizationGenerator(generator.getPackOutput()));
+        generator.addProvider(event.includeServer(), new LocalizationGenerator(generator.getPackOutput()));
     }
 }

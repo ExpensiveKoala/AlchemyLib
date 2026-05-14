@@ -3,6 +3,7 @@ package com.smashingmods.alchemylib.api.blockentity.container;
 import com.smashingmods.alchemylib.AlchemyLib;
 import com.smashingmods.alchemylib.api.blockentity.processing.AbstractProcessingBlockEntity;
 import com.smashingmods.alchemylib.common.network.BlockEntityPacket;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -27,15 +28,15 @@ public abstract class AbstractProcessingMenu extends AbstractContainerMenu {
     private final int inputSlots;
     private final int outputSlots;
 
-    protected AbstractProcessingMenu(MenuType<?> pMenuType, int pContainerId, Inventory pInventory, BlockEntity pBlockEntity, int pInputSlots, int pOutputSlots) {
-        super(pMenuType, pContainerId);
+    protected AbstractProcessingMenu(MenuType<?> menuType, int containerId, Inventory playerInventory, BlockEntity blockEntity, int inputSlots, int outputSlots) {
+        super(menuType, containerId);
 
-        this.inputSlots = pInputSlots;
-        this.outputSlots = pOutputSlots;
-        this.blockEntity = ((AbstractProcessingBlockEntity) pBlockEntity);
-        this.level = pInventory.player.level();
+        this.inputSlots = inputSlots;
+        this.outputSlots = outputSlots;
+        this.blockEntity = ((AbstractProcessingBlockEntity) blockEntity);
+        this.level = playerInventory.player.level();
 
-        addPlayerInventorySlots(pInventory);
+        addPlayerInventorySlots(playerInventory);
     }
 
     /**
@@ -45,7 +46,7 @@ public abstract class AbstractProcessingMenu extends AbstractContainerMenu {
      *
      * <p>This method sends a packet from the server to the client with the parent BlockEntity's update tag.</p>
      *
-     * @see AbstractProcessingBlockEntity#getUpdateTag()
+     * @see AbstractProcessingBlockEntity#getUpdateTag(HolderLookup.Provider)
      */
     @Override
     public void broadcastChanges() {
@@ -60,9 +61,9 @@ public abstract class AbstractProcessingMenu extends AbstractContainerMenu {
      * by AlchemyLib machines.
      */
     @Override
-    public ItemStack quickMoveStack(Player pPlayer, int pIndex) {
+    public ItemStack quickMoveStack(Player player, int index) {
         int blockEntitySlots = inputSlots + outputSlots;
-        Slot sourceSlot = slots.get(pIndex);
+        Slot sourceSlot = slots.get(index);
         if (!sourceSlot.hasItem()) {
             return ItemStack.EMPTY;
         }
@@ -70,15 +71,15 @@ public abstract class AbstractProcessingMenu extends AbstractContainerMenu {
         ItemStack sourceStack = sourceSlot.getItem();
         ItemStack copyStack = sourceStack.copy();
 
-        if (pIndex < 36) {
+        if (index < 36) {
             if (!moveItemStackTo(sourceStack, 36, 36 + inputSlots, false)) {
                 return ItemStack.EMPTY;
             }
-        } else if (pIndex < 36 + inputSlots) {
+        } else if (index < 36 + inputSlots) {
             if (!moveItemStackTo(sourceStack, 0, 36, false))  {
                 return ItemStack.EMPTY;
             }
-        } else if (pIndex >= 36 + inputSlots && pIndex < 36 + blockEntitySlots) {
+        } else if (index >= 36 + inputSlots && index < 36 + blockEntitySlots) {
             if (!moveItemStackTo(sourceStack, 0, 36, true)) {
                 return ItemStack.EMPTY;
             }
@@ -91,7 +92,7 @@ public abstract class AbstractProcessingMenu extends AbstractContainerMenu {
         } else {
             sourceSlot.setChanged();
         }
-        sourceSlot.onTake(pPlayer, sourceStack);
+        sourceSlot.onTake(player, sourceStack);
         return copyStack;
     }
 
@@ -104,53 +105,53 @@ public abstract class AbstractProcessingMenu extends AbstractContainerMenu {
      */
     @FunctionalInterface
     public interface SlotType<T> {
-        Slot apply(T pContainer, int pSlotIndex, int pX, int pY);
+        Slot apply(T container, int slotIndex, int x, int y);
     }
 
     /**
      * Overload for adding a single slot with exactly 1 row and 1 column.
      *
-     * @param pSlotType {@link SlotType}
+     * @param slotType {@link SlotType}
      */
-    protected <T> void addSlots(SlotType<T> pSlotType, T pContainer, int pXOrigin, int pYOrigin) {
-        addSlots(pSlotType, pContainer, 1, 1, 0, 1, pXOrigin, pYOrigin);
+    protected <T> void addSlots(SlotType<T> slotType, T container, int xOrigin, int yOrigin) {
+        addSlots(slotType, container, 1, 1, 0, 1, xOrigin, yOrigin);
     }
 
     /**
      * Overload for adding a single slot where the total slots of the handler might be higher than 1. This method is
      * useful for displaying slots for the same handler/container in different locations on a screen.
      *
-     * @param pSlotType {@link SlotType}
+     * @param slotType {@link SlotType}
      */
-    protected <T> void addSlots(SlotType<T> pSlotType, T pContainer, int pStartIndex, int pTotalSlots, int pXOrigin, int pYOrigin) {
-        addSlots(pSlotType, pContainer, 1, 1, pStartIndex, pTotalSlots, pXOrigin, pYOrigin);
+    protected <T> void addSlots(SlotType<T> slotType, T container, int startIndex, int totalSlots, int xOrigin, int yOrigin) {
+        addSlots(slotType, container, 1, 1, startIndex, totalSlots, xOrigin, yOrigin);
     }
 
     /**
      * This method can be used to add slots to a container menu.
      *
-     * @param pSlotType {@link SlotType}
-     * @param pContainer Container represents an object that can have items. Should either implement {@link Container}
+     * @param slotType {@link SlotType}
+     * @param container Container represents an object that can have items. Should either implement {@link Container}
      *                   or pass {@link com.smashingmods.alchemylib.api.storage.ProcessingSlotHandler ProcessingSlotHandler}.
-     * @param pRows Integer of the rows of slots to be added.
-     * @param pColumns Integer of the columns of slots to be added.
-     * @param pStartIndex Index of the container to use to start from. For example, if you have an inventory with 36 slots
+     * @param rows Integer of the rows of slots to be added.
+     * @param columns Integer of the columns of slots to be added.
+     * @param startIndex Index of the container to use to start from. For example, if you have an inventory with 36 slots
      *                    and you want to display a row of 9 slots starting at index 9, set this to 9 and set total slots to 36.
-     * @param pTotalSlots Total number of slots to add.
-     * @param pXOrigin Anchor value of the X position where slots are drawn from.
-     * @param pYOrigin Anchor value of the Y position where slots are drawn from.
-     * @param <T> See pContainer.
+     * @param totalSlots Total number of slots to add.
+     * @param xOrigin Anchor value of the X position where slots are drawn from.
+     * @param yOrigin Anchor value of the Y position where slots are drawn from.
+     * @param <T> See container.
      */
-    protected <T> void addSlots(SlotType<T> pSlotType, T pContainer, int pRows, int pColumns, int pStartIndex, int pTotalSlots, int pXOrigin, int pYOrigin) {
+    protected <T> void addSlots(SlotType<T> slotType, T container, int rows, int columns, int startIndex, int totalSlots, int xOrigin, int yOrigin) {
 
-        for (int row = 0; row < pRows; row++) {
-            for (int column = 0; column < pColumns; column++) {
-                int slotIndex = column + row * pColumns + pStartIndex;
-                int x = pXOrigin + column * 18;
-                int y = pYOrigin + row * 18;
+        for (int row = 0; row < rows; row++) {
+            for (int column = 0; column < columns; column++) {
+                int slotIndex = column + row * columns + startIndex;
+                int x = xOrigin + column * 18;
+                int y = yOrigin + row * 18;
 
-                if (slotIndex < pStartIndex + pTotalSlots) {
-                    this.addSlot(pSlotType.apply(pContainer, slotIndex, x, y));
+                if (slotIndex < startIndex + totalSlots) {
+                    this.addSlot(slotType.apply(container, slotIndex, x, y));
                 }
             }
         }
@@ -160,13 +161,13 @@ public abstract class AbstractProcessingMenu extends AbstractContainerMenu {
      * This method adds the player's inventory slots to the menu to make sure their items are accessible and drawn to
      * the screen.
      *
-     * @param pInventory Inventory for the player accessing the container menu.
+     * @param playerInventory Inventory for the player accessing the container menu.
      */
-    public void addPlayerInventorySlots(Inventory pInventory) {
+    public void addPlayerInventorySlots(Inventory playerInventory) {
         // player main inventory
-        addSlots(Slot::new, pInventory, 3, 9, 9, 27,12, 76);
+        addSlots(Slot::new, playerInventory, 3, 9, 9, 27,12, 76);
         // player hotbar
-        addSlots(Slot::new, pInventory, 1, 9, 0, 9,12, 134);
+        addSlots(Slot::new, playerInventory, 1, 9, 0, 9,12, 134);
     }
 
     /**

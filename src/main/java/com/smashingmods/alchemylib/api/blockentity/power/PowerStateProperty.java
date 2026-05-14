@@ -12,15 +12,15 @@ import java.util.Collection;
 public class PowerStateProperty extends EnumProperty<PowerState> {
     public static final PowerStateProperty POWER_STATE = PowerStateProperty.create("power_state", PowerState.values());
 
-    protected PowerStateProperty(String pName, Collection<PowerState> pValues) {
-        super(pName, PowerState.class, pValues);
+    protected PowerStateProperty(String name, Collection<PowerState> values) {
+        super(name, PowerState.class, values);
     }
 
-    public static PowerStateProperty create(String pName, PowerState... pValues) {
-        return create(pName, Arrays.asList(pValues));
+    public static PowerStateProperty create(String name, PowerState... values) {
+        return create(name, Arrays.asList(values));
     }
 
-    public static PowerStateProperty create(String pName, Collection<PowerState> pValues) {
-        return new PowerStateProperty(pName, pValues);
+    public static PowerStateProperty create(String name, Collection<PowerState> values) {
+        return new PowerStateProperty(name, values);
     }
 }

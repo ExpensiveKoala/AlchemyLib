@@ -27,14 +27,14 @@ public record TogglePauseButtonPacket(BlockPos blockPos, boolean paused) impleme
         }
 
         @Override
-        public void encode(TogglePauseButtonPacket packet, RegistryFriendlyByteBuf pBuffer) {
-            pBuffer.writeBlockPos(packet.blockPos);
-            pBuffer.writeBoolean(packet.paused);
+        public void encode(TogglePauseButtonPacket packet, RegistryFriendlyByteBuf buf) {
+            buf.writeBlockPos(packet.blockPos);
+            buf.writeBoolean(packet.paused);
         }
 
         @Override
-        public void handle(TogglePauseButtonPacket message, IPayloadContext pContext) {
-            Player player = pContext.player();
+        public void handle(TogglePauseButtonPacket message, IPayloadContext context) {
+            Player player = context.player();
             AbstractProcessingBlockEntity blockEntity = (AbstractProcessingBlockEntity) player.level().getBlockEntity(message.blockPos);
 
             if (blockEntity != null) {

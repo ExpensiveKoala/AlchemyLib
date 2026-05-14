@@ -12,19 +12,19 @@ import net.minecraft.resources.ResourceLocation;
 @SuppressWarnings("unused")
 public class PauseButton extends AbstractAlchemyButton {
 
-    public PauseButton(AbstractProcessingScreen<?> pParent) {
-        super(pParent, pButton -> {
-            boolean togglePause = !pParent.getBlockEntity().isProcessingPaused();
-            pParent.getBlockEntity().setPaused(!togglePause);
-            pParent.getBlockEntity().setChanged();
-            AlchemyLib.getPacketHandler().sendToServer(new TogglePauseButtonPacket(pParent.getBlockEntity().getBlockPos(), togglePause));
+    public PauseButton(AbstractProcessingScreen<?> parent) {
+        super(parent, button -> {
+            boolean togglePause = !parent.getBlockEntity().isProcessingPaused();
+            parent.getBlockEntity().setPaused(!togglePause);
+            parent.getBlockEntity().setChanged();
+            AlchemyLib.getPacketHandler().sendToServer(new TogglePauseButtonPacket(parent.getBlockEntity().getBlockPos(), togglePause));
         });
     }
 
     @Override
-    public void renderWidget(GuiGraphics pGuiGraphics, int pMouseX, int pMouseY, float pPartialTick) {
-        pGuiGraphics.blit(ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "textures/gui/widgets.png"), getX(), getY(), 25 + ((blockEntity.isProcessingPaused() ? 1 : 0) * 20), 20, width, height);
-        renderButtonTooltip(pGuiGraphics, pMouseX, pMouseY);
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        guiGraphics.blit(ResourceLocation.fromNamespaceAndPath(AlchemyLib.MODID, "textures/gui/widgets.png"), getX(), getY(), 25 + ((blockEntity.isProcessingPaused() ? 1 : 0) * 20), 20, width, height);
+        renderButtonTooltip(guiGraphics, mouseX, mouseY);
     }
 
     @Override

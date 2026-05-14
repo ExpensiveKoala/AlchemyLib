@@ -34,15 +34,15 @@ public abstract class AbstractProcessingBlock extends BaseEntityBlock {
      * reference in {@link #newBlockEntity}. The block entity's BlockPos and BlockState can't be known
      * in advance, pass a function that can apply the BlockPos and BlockState at runtime.
      *
-     * @param pBlockEntity takes a BiFunction that requires a BlockPos and BlockState and returns a BlockEntity.
+     * @param blockEntity takes a BiFunction that requires a BlockPos and BlockState and returns a BlockEntity.
      *
      * @see BlockPos
      * @see BlockState
      * @see BlockEntity
      */
-    public AbstractProcessingBlock(BiFunction<BlockPos, BlockState, BlockEntity> pBlockEntity) {
+    public AbstractProcessingBlock(BiFunction<BlockPos, BlockState, BlockEntity> blockEntity) {
         super(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).requiresCorrectToolForDrops().strength(5.0F, 6.0F).sound(SoundType.METAL));
-        blockEntityFunction = pBlockEntity;
+        blockEntityFunction = blockEntity;
     }
 
     /**
@@ -50,13 +50,13 @@ public abstract class AbstractProcessingBlock extends BaseEntityBlock {
      * This means that when you place the block, it's forward face will be looking at you
      * as expected.
      *
-     * @param pContext {@link BlockPlaceContext}
+     * @param context {@link BlockPlaceContext}
      * @return {@link BlockState}
      */
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-        return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     /**
@@ -65,14 +65,14 @@ public abstract class AbstractProcessingBlock extends BaseEntityBlock {
      * @see BaseEntityBlock#rotate(BlockState, LevelAccessor, BlockPos, Rotation)
      */
     @Override
-    public BlockState rotate(BlockState pState, LevelAccessor pLevelAccessor, BlockPos pBlockPos, Rotation pRotation) {
-        return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
+    public BlockState rotate(BlockState state, LevelAccessor level, BlockPos pos, Rotation direction) {
+        return state.setValue(FACING, direction.rotate(state.getValue(FACING)));
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public BlockState mirror(BlockState pState, Mirror pMirror) {
-        return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
     /**
@@ -81,12 +81,12 @@ public abstract class AbstractProcessingBlock extends BaseEntityBlock {
      * @see BaseEntityBlock#createBlockStateDefinition(StateDefinition.Builder)
      */
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(FACING);
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(FACING);
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState pState) {
+    public RenderShape getRenderShape(BlockState blockState) {
         return RenderShape.MODEL;
     }
 
@@ -97,14 +97,14 @@ public abstract class AbstractProcessingBlock extends BaseEntityBlock {
      */
 
     @Override
-    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        if (pState.getBlock() != pNewState.getBlock()) {
-            BlockEntity blockEntity = pLevel.getBlockEntity(pPos);
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (state.getBlock() != newState.getBlock()) {
+            BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity instanceof InventoryBlockEntity inventoryBlockEntity) {
-                inventoryBlockEntity.dropContents(pLevel, pPos);
+                inventoryBlockEntity.dropContents(level, pos);
             }
         }
-        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     /**
@@ -115,7 +115,7 @@ public abstract class AbstractProcessingBlock extends BaseEntityBlock {
      */
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-        return blockEntityFunction.apply(pPos, pState);
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return blockEntityFunction.apply(pos, state);
     }
 }
